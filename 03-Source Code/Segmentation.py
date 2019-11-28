@@ -33,8 +33,59 @@ def SegementedImageLines(img):
 
     for LineImage in ListOfImageLines:
         io.imshow(LineImage, cmap="binary")  # 0~255 np.zeros((2, 1))
-        io.show()
+    io.show()
     ImageWithLine = SegemenetedRows[0:index, :]
     io.imshow(ImageWithLine, cmap="binary")  # 0~255 np.zeros((2, 1))
     io.show()
     return ListOfImageLines
+
+def skel(img):
+    size = np.size(img)
+    skell = np.zeros(img.shape, np.uint8)
+
+    ret, img = cv2.threshold(img, 127, 255, 0)
+    element = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
+    done = False
+
+    for i in range(0,2):
+        eroded = cv2.erode(img, element)
+        temp = cv2.dilate(eroded, element)
+        temp = cv2.subtract(img, temp)
+        skell = cv2.bitwise_or(skell, temp)
+        img = eroded.copy()
+
+        zeros = size - cv2.countNonZero(img)
+        if zeros == size:
+            done = True
+    return skell
+def getWordImages(ListofImageLines):
+    for i in ListofImageLines:
+        ret, thresh = cv2.threshold(i, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        kernel2 = cv2.getStructuringElement(cv2.MORPH_CROSS,(3,3))
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
+
+        kerneltext = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+        #dilation = cv2.erode(thresh, kerneltext, iterations=1)
+        # dilation = cv2.dilate(dilation, kernel, iterations=1)
+        dilation = 255 - thresh
+        #dilation = cv2.dilate(dilation, np.array([1]), iterations=4)
+        #dilation = cv2.morphologyEx(dilation, cv2.MORPH_OPEN, kernel)
+
+        io.imshow(dilation, cmap="binary")
+        io.show()
+
+        connectivity = 8
+        output = cv2.connectedComponentsWithStats(dilation, connectivity, cv2.CV_32S)
+
+        stats = output[2]
+        for j in range(0, output[0]):
+
+            start = stats[j, cv2.CC_STAT_LEFT]
+            end = start + stats[j, cv2.CC_STAT_WIDTH]
+            print(start,end)
+            opening = cv2.morphologyEx(dilation[:, start:end], cv2.MORPH_OPEN, kernel2)
+
+            #opening = cv2.erode(dilation[:, start:end], kernel2, iterations=1)
+
+            io.imshow(dilation[:, start:end], cmap="binary")
+            io.show()
