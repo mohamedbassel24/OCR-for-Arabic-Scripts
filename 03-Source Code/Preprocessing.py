@@ -37,10 +37,4 @@ def Preprocess(img):
     return rotated
 
 
-for filename in sorted(glob.glob('../02-Dataset/Training_Data/*.png')):
-    filename = "csep1220.png" # The Rotated Image
-    img = cv2.imread(filename)
-    img = Preprocess(img)
-    cv2.namedWindow('image', cv2.WINDOW_NORMAL)
-    cv2.imshow(filename, img)
-    cv2.waitKey(0)
+
