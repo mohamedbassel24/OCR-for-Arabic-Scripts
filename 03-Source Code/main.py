@@ -9,4 +9,4 @@ for filename in sorted(glob.glob('../02-Dataset/Training_Data/*.png')):
     img = cv2.imread(filename)
     img = Preprocess(img,ShowSteps)
     SegementedLines = SegementedImageLines(img,ShowSteps)
-    getWordImages(SegementedLines)
+    getWordImages(SegementedLines[2:])

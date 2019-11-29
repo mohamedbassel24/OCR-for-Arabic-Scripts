@@ -71,32 +71,36 @@ def getWordImages(ListofImageLines):
         kernel2 = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
 
-        kerneltext = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-        # dilation = cv2.erode(thresh, kerneltext, iterations=1)
-        # dilation = cv2.dilate(dilation, kernel, iterations=1)
+
+
         dilation = 255 - thresh
         # dilation = cv2.dilate(dilation, np.array([1]), iterations=4)
         # dilation = cv2.morphologyEx(dilation, cv2.MORPH_OPEN, kernel)
 
         io.imshow(dilation, cmap="binary")
         io.show()
-
         connectivity = 4
         output = cv2.connectedComponentsWithStats(dilation, connectivity, cv2.CV_32S)
-
         stats = output[2]
-
         stats = stats[stats[:, 0].argsort()]
+        print(stats)
 
+        stats = stats[(stats[:,cv2.CC_STAT_WIDTH]>1) & (stats[:,cv2.CC_STAT_AREA]>10)]
+        j=1
+        while (True):
+            if j + 1 > stats.shape[0]:
+                break
+            start = stats[j, cv2.CC_STAT_LEFT]
+            end = start + stats[j, cv2.CC_STAT_WIDTH]
+            while (j+1<stats.shape[0]) and (end + 3 >= stats[j + 1, cv2.CC_STAT_LEFT]):
+                end = stats[j + 1, cv2.CC_STAT_LEFT] + stats[j + 1, cv2.CC_STAT_WIDTH]
+                j += 1
+                # print(stats[j, cv2.CC_STAT_LEFT],stats[j, cv2.CC_STAT_WIDTH],end)
+            print(start, end,j)
+            opening = cv2.morphologyEx(dilation[:, start:end], cv2.MORPH_OPEN, kernel2)
 
-        for j in range(0, output[2].shape[0]):
-            if stats[j, cv2.CC_STAT_WIDTH] > 2 and stats[j, cv2.CC_STAT_AREA  ]>25:
-                start = stats[j, cv2.CC_STAT_LEFT]
-                end = start + stats[j, cv2.CC_STAT_WIDTH]
-                print(stats[j])
-                opening = cv2.morphologyEx(dilation[:, start:end], cv2.MORPH_OPEN, kernel2)
+                # opening = cv2.erode(dilation[:, start:end], kernel2, iterations=1)
 
-            # opening = cv2.erode(dilation[:, start:end], kernel2, iterations=1)
-
-                io.imshow(dilation[:, start:end], cmap="binary")
-                io.show()
+            io.imshow(dilation[:, start:end], cmap="binary")
+            io.show()
+            j+=1
