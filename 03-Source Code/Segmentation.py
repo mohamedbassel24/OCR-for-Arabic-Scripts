@@ -1,4 +1,4 @@
-from commonfunctions import *
+﻿from commonfunctions import *
 
 
 def SegementedImageLines(img):
