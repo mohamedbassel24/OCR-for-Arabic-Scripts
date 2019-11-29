@@ -61,6 +61,10 @@ def skel(img):
     return skell
 
 
+def sortSecond(val):
+    return val[0]
+
+
 def getWordImages(ListofImageLines):
     for i in ListofImageLines:
         ret, thresh = cv2.threshold(i, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
@@ -77,17 +81,22 @@ def getWordImages(ListofImageLines):
         io.imshow(dilation, cmap="binary")
         io.show()
 
-        connectivity = 8
+        connectivity = 4
         output = cv2.connectedComponentsWithStats(dilation, connectivity, cv2.CV_32S)
 
         stats = output[2]
-        for j in range(0, output[0]):
-            start = stats[j, cv2.CC_STAT_LEFT]
-            end = start + stats[j, cv2.CC_STAT_WIDTH]
-            print(start, end)
-            opening = cv2.morphologyEx(dilation[:, start:end], cv2.MORPH_OPEN, kernel2)
+
+        stats = stats[stats[:, 0].argsort()]
+
+
+        for j in range(0, output[2].shape[0]):
+            if stats[j, cv2.CC_STAT_WIDTH] > 2 and stats[j, cv2.CC_STAT_AREA  ]>25:
+                start = stats[j, cv2.CC_STAT_LEFT]
+                end = start + stats[j, cv2.CC_STAT_WIDTH]
+                print(stats[j])
+                opening = cv2.morphologyEx(dilation[:, start:end], cv2.MORPH_OPEN, kernel2)
 
             # opening = cv2.erode(dilation[:, start:end], kernel2, iterations=1)
 
-            io.imshow(dilation[:, start:end], cmap="binary")
-            io.show()
+                io.imshow(dilation[:, start:end], cmap="binary")
+                io.show()
