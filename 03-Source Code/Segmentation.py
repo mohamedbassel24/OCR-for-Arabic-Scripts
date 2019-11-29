@@ -1,39 +1,41 @@
 from commonfunctions import *
 
 
-def SegementedImageLines(img):
+def SegementedImageLines(img, rShowSteps):
     # hist = cv2.reduce(thresh, 0, cv2.REDUCE_AVG).reshape(-1)
     #  plt.hist(thresh.ravel(), 256, [0, 255])
     #  plt.show()
 
     img = 255 - img
     ret, thresh = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY_INV)
+    thresh = img
     # lines segmentation involves horizontal projection of the image rows to find the empty rows between rows that contain text a
     img_lines = np.copy(255 - img)
     i = 0  # iteratior on the rows of image(NxM)
     ListOfImageLines = []  # Contains the Segemented Lines Images
     while i < img.shape[0]:
-        if np.sum(thresh[i, :, 0]) != thresh.shape[1] * 255:
+        if np.sum(thresh[i, :]) != thresh.shape[1] * 255:
             First_Point = i - 1
-            while np.sum(thresh[i, :, 0]) != thresh.shape[1] * 255:
+            while np.sum(thresh[i, :]) != thresh.shape[1] * 255:
                 i = i + 1
             LastPoint = i + 2  # for ي
             i = i + 2
             if abs(First_Point - LastPoint) < 10:
                 continue  # not a line :( points
-            partition = np.copy(thresh[First_Point:LastPoint, :, 0])
+            partition = np.copy(thresh[First_Point:LastPoint, :])
             ListOfImageLines.append(partition)
-            img_lines[i, :, 0] = (np.ones(thresh.shape[1]))  # LINE END
+            img_lines[i, :] = (np.ones(thresh.shape[1]))  # LINE END
         else:
             i = i + 1
         # Successfully Segmented the lines
 
     # For Printing Purposes & Illustration =>
     LineCount = 1
-    for LineImage in ListOfImageLines:
-        show_images([255-LineImage], ["Line( " + str(LineCount) + ") :"])
-        LineCount += 1
-    show_images([255 - img, img_lines], ["Orignal Image ", "Image Withe Lines "])
+    if rShowSteps:
+        for LineImage in ListOfImageLines:
+            show_images([255 - LineImage], ["Line( " + str(LineCount) + ") :"])
+            LineCount += 1
+        show_images([255 - img, img_lines], ["Orignal Image ", "Image Withe Lines "])
 
     return ListOfImageLines
 
