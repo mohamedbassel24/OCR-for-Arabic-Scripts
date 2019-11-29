@@ -92,7 +92,7 @@ def getWordImages(ListofImageLines):
                 break
             start = stats[j, cv2.CC_STAT_LEFT]
             end = start + stats[j, cv2.CC_STAT_WIDTH]
-            while (j+1<stats.shape[0]) and (end + 3 >= stats[j + 1, cv2.CC_STAT_LEFT]):
+            while (j+1<stats.shape[0]) and (end + 4 >= stats[j + 1, cv2.CC_STAT_LEFT]):
                 end = stats[j + 1, cv2.CC_STAT_LEFT] + stats[j + 1, cv2.CC_STAT_WIDTH]
                 j += 1
                 # print(stats[j, cv2.CC_STAT_LEFT],stats[j, cv2.CC_STAT_WIDTH],end)
