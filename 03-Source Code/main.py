@@ -9,3 +9,4 @@ for filename in sorted(glob.glob('../02-Dataset/Training_Data/*.png')):
     img = Preprocess(img)
     SegementedLines=[]
     SegementedLines=SegementedImageLines(img)
+    getWordImages(SegementedLines)
