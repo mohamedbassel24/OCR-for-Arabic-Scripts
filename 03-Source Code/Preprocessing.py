@@ -1,8 +1,8 @@
 from commonfunctions import *
 
 
-def Preprocess(img):
-    #img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+def Preprocess(img, showSteps):
+    # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     # img = cv2.blur(img, (3, 3))  # Blur the image to remove the noise (apply a Gaussian low pass filter 3x3)
     # _, img = cv2.threshold(img, 50, 255, cv2.THRESH_BINARY)  #Convert the grayscale image to a binary image
 
@@ -34,7 +34,11 @@ def Preprocess(img):
     rotated = cv2.warpAffine(img, M, (w, h),
                              flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
 
-    return rotated
-
-
-
+    rotated = cv2.cvtColor(rotated, cv2.COLOR_BGR2GRAY)
+    GlobalThresh = threshold_otsu(rotated)
+    ThreshImage = np.copy(rotated)
+    ThreshImage[rotated >= GlobalThresh] = 0
+    ThreshImage[rotated < GlobalThresh] = 1
+    if showSteps:
+        show_images([255-img, ThreshImage], ["Orignal Image ", "After Threholding And rotation"])
+    return ThreshImage
