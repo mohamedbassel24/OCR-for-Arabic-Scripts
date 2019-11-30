@@ -2,6 +2,7 @@
 
 
 def SegementedImageLines(img, rShowSteps):
+    """" Given The Image get The text per line """
     # hist = cv2.reduce(thresh, 0, cv2.REDUCE_AVG).reshape(-1)
     #  plt.hist(thresh.ravel(), 256, [0, 255])
     #  plt.show()
@@ -24,7 +25,7 @@ def SegementedImageLines(img, rShowSteps):
                 continue  # not a line :( points
             partition = np.copy(thresh[First_Point:LastPoint, :])
             ListOfImageLines.append(partition)
-            img_lines[i, :] = 100*(np.ones(thresh.shape[1]))  # LINE END
+            img_lines[i, :] = 100 * (np.ones(thresh.shape[1]))  # LINE END
         else:
             i = i + 1
         # Successfully Segmented the lines
@@ -65,13 +66,14 @@ def sortSecond(val):
     return val[0]
 
 
-def getWordImages(ListofImageLines,rShowSteps):
-    ListOfWordsPerLine=[]
+def getWordImages(ListofImageLines, rShowSteps):
+    """" Given The Images Per Lines Get Words for each Line"""
+    ListOfWordsPerLine = []
     for i in ListofImageLines:
-        #ret, thresh = cv2.threshold(i, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-       # kernel2 = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
-       # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
-        dilation = 255-i
+        # ret, thresh = cv2.threshold(i, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        # kernel2 = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
+        # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
+        dilation = 255 - i
         if rShowSteps:
             io.imshow(dilation, cmap="binary")
             io.show()
@@ -105,3 +107,12 @@ def getWordImages(ListofImageLines,rShowSteps):
         ListOfWordsPerLine.append(ListOfWords)
     return ListOfWordsPerLine
 
+
+def getCharImages(WordsPerLine):
+    """" GET Char per Word """
+    for Line in WordsPerLine:
+        for Word in Line:
+            partition = np.copy(Word)
+            show_images([255 - partition], ["SubWord"])
+            # TODO: Search for a meathod to implement this Functions
+            # SUGGESTION => Calculate Width for each letter and segement by this method
