@@ -24,7 +24,7 @@ def SegementedImageLines(img, rShowSteps):
                 continue  # not a line :( points
             partition = np.copy(thresh[First_Point:LastPoint, :])
             ListOfImageLines.append(partition)
-            img_lines[i, :] = (np.ones(thresh.shape[1]))  # LINE END
+            img_lines[i, :] = 100*(np.ones(thresh.shape[1]))  # LINE END
         else:
             i = i + 1
         # Successfully Segmented the lines
@@ -65,42 +65,43 @@ def sortSecond(val):
     return val[0]
 
 
-def getWordImages(ListofImageLines):
+def getWordImages(ListofImageLines,rShowSteps):
+    ListOfWordsPerLine=[]
     for i in ListofImageLines:
-        ret, thresh = cv2.threshold(i, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-        kernel2 = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
-
-
-
-        dilation = 255 - thresh
-        # dilation = cv2.dilate(dilation, np.array([1]), iterations=4)
-        # dilation = cv2.morphologyEx(dilation, cv2.MORPH_OPEN, kernel)
-
-        io.imshow(dilation, cmap="binary")
-        io.show()
+        #ret, thresh = cv2.threshold(i, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+       # kernel2 = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
+       # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
+        dilation = 255-i
+        if rShowSteps:
+            io.imshow(dilation, cmap="binary")
+            io.show()
         connectivity = 4
         output = cv2.connectedComponentsWithStats(dilation, connectivity, cv2.CV_32S)
         stats = output[2]
         stats = stats[stats[:, 0].argsort()]
-        print(stats)
+        if rShowSteps:
+            print(stats)
 
-        stats = stats[(stats[:,cv2.CC_STAT_WIDTH]>1) & (stats[:,cv2.CC_STAT_AREA]>10)]
-        j=1
+        stats = stats[(stats[:, cv2.CC_STAT_WIDTH] > 1) & (stats[:, cv2.CC_STAT_AREA] > 10)]
+        j = 1
+        ListOfWords = []
         while (True):
             if j + 1 > stats.shape[0]:
                 break
             start = stats[j, cv2.CC_STAT_LEFT]
             end = start + stats[j, cv2.CC_STAT_WIDTH]
-            while (j+1<stats.shape[0]) and (end + 4 >= stats[j + 1, cv2.CC_STAT_LEFT]):
+            while (j + 1 < stats.shape[0]) and (end + 4 >= stats[j + 1, cv2.CC_STAT_LEFT]):
                 end = stats[j + 1, cv2.CC_STAT_LEFT] + stats[j + 1, cv2.CC_STAT_WIDTH]
                 j += 1
                 # print(stats[j, cv2.CC_STAT_LEFT],stats[j, cv2.CC_STAT_WIDTH],end)
-            print(start, end,j)
-            opening = cv2.morphologyEx(dilation[:, start:end], cv2.MORPH_OPEN, kernel2)
+            if rShowSteps:
+                print(start, end, j)
+            ListOfWords.insert(0, dilation[:, start:end])
+            j += 1
+        if rShowSteps:
+            for X in ListOfWords:
+                io.imshow(X, cmap="binary")
+                io.show()
+        ListOfWordsPerLine.append(ListOfWords)
+    return ListOfWordsPerLine
 
-                # opening = cv2.erode(dilation[:, start:end], kernel2, iterations=1)
-
-            io.imshow(dilation[:, start:end], cmap="binary")
-            io.show()
-            j+=1
