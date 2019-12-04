@@ -1,4 +1,5 @@
 ﻿from commonfunctions import *
+from skimage.morphology import binary_erosion, binary_dilation, binary_closing, skeletonize, thin
 
 
 def SegementedImageLines(img, rShowSteps):
@@ -113,6 +114,100 @@ def getCharImages(WordsPerLine):
     for Line in WordsPerLine:
         for Word in Line:
             partition = np.copy(Word)
-            show_images([255 - partition], ["SubWord"])
+
+            img = skeletonize(partition * 255)
+            # sk_thin_5 = thin(partition, 5)
+            partition[partition > 0] = 1
             # TODO: Search for a meathod to implement this Functions
-            # SUGGESTION => Calculate Width for each letter and segement by this method
+            # SUGGESTION => Calculate Width for each letter and segment by this method
+            # BASELINE DETECTION =>
+            MAX = 0
+            Base_INDEX = 0
+            #   img=255-img
+            for i in range(partition.shape[0]):
+                max = np.sum(partition[i])
+                if max > MAX:
+                    MAX = max
+                    Base_INDEX = i
+            # img[INDEX]=np.ones(img.shape[1])*150
+            # Max transitions DETECTION =>
+            MaxTransition = 0
+            MaxTransitionIndex = Base_INDEX
+            for i in range(0, Base_INDEX, 1):  # loop on Each row
+                CurrTransitionRow = 0
+                flag = 0
+                for j in range(partition.shape[1]):  # loop on coloumns for specific row
+                    if flag == 0 and partition[i, j] == 1:
+                        flag = 1
+                        CurrTransitionRow += 1
+                    elif flag == 1 and partition[i, j] == 0:
+                        flag = 0
+
+                if CurrTransitionRow > MaxTransition:
+                    MaxTransitionIndex = i
+                    MaxTransition = CurrTransitionRow
+            #img[MaxTransitionIndex] = np.ones(partition.shape[1]) * 150
+           # img[Base_INDEX] = np.ones(partition.shape[1]) * 150
+            print(MaxTransition, MaxTransitionIndex,Base_INDEX)  # MTI
+            # CutPoint Algorithm =>
+            flag = 0
+            ListOfCuts = []
+            partition=1-partition
+            show_images([1 - partition, img], ["SubWord", "Smoothing"])
+            for i in range(partition.shape[1]):
+                if partition[MaxTransitionIndex, i] == 1 and flag == 0:
+                    StartIndex = i
+                    flag = 1
+                elif partition[MaxTransitionIndex, i] == 0 and flag == 1:
+                    EndIndex = i
+                    flag = 0
+                    MiddleIndex = int((StartIndex + EndIndex) / 2)
+                    partition = 1 - partition
+
+                    x = np.sum(partition[0: MaxTransitionIndex, MiddleIndex])
+                    print(x, "asdasd")
+                    j=StartIndex
+                    ConcaveFound=False
+                    while np.sum(partition[0: MaxTransitionIndex, j])!=0:
+                        j+=1
+                        if j == EndIndex:
+                            ConcaveFound=True
+                            break
+                    if ConcaveFound: # false cut a word has a hole
+                        continue
+                    else:
+                        MiddleIndex=j #adjst the middle index
+        #            if np.sum(partition[0: MaxTransitionIndex, MiddleIndex]) != 0:
+         #               continue
+
+                    # for space seperation ?
+                    for j in range(abs(StartIndex - EndIndex)):
+                        x = np.sum(partition[:, StartIndex + j])
+                        print(x, "besoooo")
+                        if np.sum(partition[:, StartIndex + j]) == 0:
+                            print("heeeeeeeeeeere")
+                            MiddleIndex = j+StartIndex
+
+
+                    partition = 1 - partition
+                    ListOfCuts.insert(0,MiddleIndex)
+
+
+            print(ListOfCuts)
+            start=partition.shape[1]
+            del ListOfCuts[len(ListOfCuts)-1]
+
+
+            for Cut in ListOfCuts:
+
+                img[:, Cut] = np.ones(partition.shape[0]) * 150
+            show_images([255 - partition, img], ["SubWord", "Smoothing"])
+
+            ListOfCuts.append(0)
+            print(ListOfCuts)
+            for Cut in ListOfCuts:
+                partition_Char=partition[:,Cut:start]
+                start=Cut
+                show_images([1 - partition_Char], ["SubChar"])
+
+        show_images([255 - partition, img], ["SubWord", "Smoothing"])

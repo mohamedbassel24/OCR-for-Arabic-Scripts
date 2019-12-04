@@ -46,7 +46,7 @@ def Preprocess(img, showSteps):
 
 
 
-    GlobalThresh = threshold_otsu(rotated)
+    GlobalThresh = threshold_otsu(rotated)-40
     ThreshImage = np.copy(rotated)
     ThreshImage[rotated >= GlobalThresh] = 0
     ThreshImage[rotated < GlobalThresh] = 1
