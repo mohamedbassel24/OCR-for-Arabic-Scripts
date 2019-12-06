@@ -148,3 +148,33 @@ def mDilation(mPic,SE):
 def PrintBinary(PIC):
     io.imshow(PIC,cmap="binary") # 0~255 np.zeros((2, 1))
     io.show()
+def my_erosion(img, mask):
+    shape = img.shape
+    new_img = np.copy(img)
+    out = int(np.floor(len(mask) / 2))
+    for i in range(out, shape[0] - out):
+        for j in range(out, shape[1] - out):
+            portion = img[i - out:i + out + 1, j - out:j + out + 1]
+            mat = np.multiply(mask, portion)
+            new_img[i, j] = np.min(mat)
+    return new_img
+
+
+def my_dilation(img, mask):
+    shape = img.shape
+    new_img = np.copy(img)
+    out = int(np.floor(len(mask) / 2))
+    for i in range(out, shape[0] - out):
+        for j in range(out, shape[1] - out):
+            portion = img[i - out:i + out + 1, j - out:j + out + 1]
+            mat = np.multiply(mask, portion)
+            new_img[i, j] = np.max(mat)
+    return new_img
+
+
+def Opening(mPic, SE):
+    return my_dilation(my_erosion(mPic, SE), SE)
+
+
+def Closing(mPic, SE):
+    return my_erosion(my_dilation(mPic, SE), SE)
