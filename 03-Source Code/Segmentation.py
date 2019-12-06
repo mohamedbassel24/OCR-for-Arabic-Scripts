@@ -108,9 +108,16 @@ def getWordImages(ListofImageLines, rShowSteps):
                 io.show()
         ListOfWordsPerLine.append(ListOfWords)
     return ListOfWordsPerLine
+def StrokeDetection(char_img):
+    #feature 1
+    #feature 2
+    #feature 3
+    #feature 4
+    return 1
 
 
-def getCharImages(WordsPerLine):
+
+def getCharImages(WordsPerLine,ShowSteps):
     """" GET Char per Word """
     WordCount = 0
     MFV=0
@@ -118,16 +125,23 @@ def getCharImages(WordsPerLine):
     for Line in WordsPerLine:
         for Word in Line:
             partition = np.copy(Word)
+            #PreProcessing for the word ======================>
+
             # img = skeletonize(partition * 255)
             img = np.copy(partition)
             partition= skeletonize(partition *255)
-            # partition = thin(partition * 255,500)
-            # sk_thin_5 = thin(partition, 5)ss['[['
+
+          #  SE=np.ones((3,3))
+          #  partition = convolve2d(partition, SE)
             partition[partition > 0] = 1
 
-            SE=np.zeros((3,3))
-            SE[1,1]=1
-            SE[1, 2] = 1
+            #partition = skeletonize(partition * 255)
+            # partition = thin(partition * 255,500)
+            # sk_thin_5 = thin(partition, 5)ss['[['
+         #   partition[partition > 0] = 1
+
+          #  SE[1,1]=1
+        #    SE[1, 2] = 1
            # partition = my_dilation(partition, SE)
         #    partition=my_erosion(partition,SE)
             # partition=Opening(partition,SE)
@@ -173,7 +187,8 @@ def getCharImages(WordsPerLine):
             ListOfCuts = []
             FirstRegion = True
             # partition = 1 - partition
-            show_images([partition, img], ["SubWord (" + str(WordCount) + " )", "Smoothing"])
+            if ShowSteps:
+                show_images([partition, img], ["SubWord (" + str(WordCount) + " )", "Smoothing"])
             WordCount += 1
             # Background => zero Word =>1
             for i in range(partition.shape[1]):
@@ -187,20 +202,11 @@ def getCharImages(WordsPerLine):
                     MiddleIndex = int((StartIndex + EndIndex) / 2)
                     if abs(StartIndex-EndIndex) <2:
                         continue
-                    if WordCount == 9:
+                    if WordCount == 2:
                         print("This is a dummy condition for Debuging")
 
                     HR_Above = np.sum(partition[0:MaxTransitionIndex, :MiddleIndex])
                     HR_blew = np.sum(partition[MaxTransitionIndex - 1:, :MiddleIndex])
-                    if FirstRegion:
-
-                        FirstRegion = False
-                        if HR_Above > HR_blew and MFV == np.sum(partition[:, MiddleIndex]):
-                            ListOfCuts.insert(0, MiddleIndex)
-
-                            continue
-                        else:
-                            continue
 
                     #     partition = 1 - partition
                     # for space seperation ?
@@ -215,8 +221,23 @@ def getCharImages(WordsPerLine):
                             ThereIsGap = True
                             break
                     if ThereIsGap:
+                        if FirstRegion:
+                            if np.sum(partition[:Base_INDEX-1, StartIndex:EndIndex-1])== 0:
+                                FirstRegion=False
+                                continue
                         ListOfCuts.insert(0, MiddleIndex)
+                        if FirstRegion:
+                            FirstRegion=False
                         continue
+                    if FirstRegion:
+
+                        FirstRegion = False
+                        if HR_Above > HR_blew and MFV == np.sum(partition[:, MiddleIndex]):
+                            ListOfCuts.insert(0, MiddleIndex)
+
+                            continue
+                        else:
+                            continue
 
                     # For Holes Detection
                     k = StartIndex
@@ -238,7 +259,7 @@ def getCharImages(WordsPerLine):
                     HR_Above = np.sum(partition[0:Base_INDEX, :MiddleIndex])
                     HR_blew = np.sum(partition[Base_INDEX - 1:, :MiddleIndex])
                     # print(HR_Above, HR_blew, np.sum(partition[:, MiddleIndex]))
-                    BaseLineDetection = np.sum(partition[Base_INDEX, StartIndex:EndIndex - 1])
+                    BaseLineDetection = np.sum(partition[Base_INDEX, StartIndex:EndIndex ])
                     if BaseLineDetection == 0 and HR_blew >= HR_Above:
                         continue
 
@@ -268,7 +289,8 @@ def getCharImages(WordsPerLine):
 
             for Cut in ListOfCuts:
                 img[:, Cut] = np.ones(partition.shape[0]) * 150
-            show_images([partition, img], ["SubWord (" + str(WordCount) + " )", "Smoothing"])
+            if ShowSteps:
+                show_images([partition, img], ["SubWord (" + str(WordCount) + " )", "Smoothing"])
 
             ListOfCuts.append(0)
       #      print(ListOfCuts)
@@ -278,5 +300,5 @@ def getCharImages(WordsPerLine):
                 partition_Char = partition[:, Cut:start]
                 start = Cut
             #  show_images([1 - partition_Char], ["SubChar"])
-
-        show_images([255 - partition, img], ["SubWord", "Smoothing"])
+        if ShowSteps:
+            show_images([255 - partition, img], ["SubWord", "Smoothing"])

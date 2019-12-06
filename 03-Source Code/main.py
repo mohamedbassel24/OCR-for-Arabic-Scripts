@@ -11,5 +11,5 @@ for filename in sorted(glob.glob('../02-Dataset/Training_Data/*.png')):
     img = Preprocess(img, ShowSteps)
     SegementedLines = SegementedImageLines(img, ShowSteps)
     SegementedWordsPerLine = getWordImages(SegementedLines,ShowSteps)
-    getCharImages(SegementedWordsPerLine)
+    getCharImages(SegementedWordsPerLine,1)
 
