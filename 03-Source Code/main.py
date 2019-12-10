@@ -41,8 +41,8 @@ for filename in sorted(glob.glob('../02-Dataset/Training_Data/*.png')):
             # Char_Feature=Extracting_features()
 
             for Char, Char_Text in zip(CharactersPerWord, TextImage[WordTextIndex]):
-                show_images([Char], ["Segemented Character for " + Char_Text])
+                show_images([1-Char], ["Segemented Character for " + Char_Text])
                 Char = Char.astype('uint8')
-                print(np.shape(Char))
-                print(Extracting_features((Char)))
+                #print(Char)
+                print(Extracting_features((1-Char)))
             WordTextIndex += 1

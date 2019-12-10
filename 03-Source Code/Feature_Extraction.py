@@ -7,11 +7,16 @@ def findLetterContourArea(img):
     # This function will not work correctly unless you preprocess the image properly as indicated.
 #    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
  #   ret,thresh = cv2.threshold(gray,50,255,cv2.THRESH_BINARY)
+    #SE=np.ones((3,3))
+    #img=Opening(img, SE)
+    #show_images([img])
     contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    print(len(contours))
+    #print(contours[0])
     framearea = cv2.contourArea(contours[0])
     # TODO: Find the contour area of the given image (img) (~1 line)
-    maxArea = cv2.contourArea(contours[1])
-    index = 1
+    maxArea = 0
+    index = 0
     for i in range(1, len(contours)):
         if (cv2.contourArea(contours[i]) > maxArea):
             maxArea = cv2.contourArea(contours[i])
@@ -20,10 +25,8 @@ def findLetterContourArea(img):
     return maxArea, contours[index], framearea
 
 
-def Count_connected_parts(
-        img):  # this function returns the number of connected parts given the binary image of any letter
-    labeled, nr_objects = ndimage.label(
-        img < 1)  # 100 is the threshold but in case of binary image given (0,1) it will change
+def Count_connected_parts(img):  # this function returns the number of connected parts given the binary image of any letter
+    labeled, nr_objects = ndimage.label(img < 1)  # 100 is the threshold but in case of binary image given (0,1) it will change
     # print(nr_objects)
     # print("Number of objects is {}".format(nr_objects))
     return nr_objects
@@ -66,7 +69,7 @@ def Max_transition_rows(img):
             if flag == 1 and img[i, j] == 0:
                 flag = 0
                 CurrTransitionRow += 1
-            elif flag == 0 and img[i, j] == 255:
+            elif flag == 0 and img[i, j] == 1:
                 flag = 1
                 CurrTransitionRow += 1
 
@@ -89,7 +92,7 @@ def Max_transition_colomns(img):
             if flag == 1 and img[j, i] == 0:
                 flag = 0
                 CurrTransitionCol += 1
-            elif flag == 0 and img[j, i] == 255:
+            elif flag == 0 and img[j, i] == 1:
                 flag = 1
                 CurrTransitionCol += 1
 
