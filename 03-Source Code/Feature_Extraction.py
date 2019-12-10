@@ -44,7 +44,7 @@ def count_holes(img, num_connected_parts):  # count number of holes in each char
 
     contours, hierarchy = cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     # print("y= ",len(contours)-1-num_connected_parts)
-    return len(contours) - 1 - num_connected_parts  # -1 is the contour of the image frame
+    return len(contours)  - num_connected_parts  # -1 is the contour of the image frame
 
 
 def Height_Width_Ratio(img):
@@ -55,7 +55,7 @@ def Height_Width_Ratio(img):
     # print(y)
     # print(h)
     # print(w)
-    return h / w,  # area/whiteArea
+    return h / w  # area/whiteArea
 
 
 def Max_transition_rows(img):
@@ -107,7 +107,7 @@ def Extracting_features(img):
     h_W = Height_Width_Ratio(img)
     vertical_trans = Max_transition_colomns(img)
     horizontal_trans = Max_transition_rows(img)
-    return [num_parts, holes, h_W[0], vertical_trans, horizontal_trans]
+    return [num_parts, holes, h_W, vertical_trans, horizontal_trans]
 
 # img=io.imread("test character letters/heh.png")
 # h_w,r=Height_Width_Ratio(image)
