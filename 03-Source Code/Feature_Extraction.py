@@ -44,7 +44,7 @@ def count_holes(img, num_connected_parts):  # count number of holes in each char
 
     contours, hierarchy = cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     # print("y= ",len(contours)-1-num_connected_parts)
-    return len(contours)  - num_connected_parts  # -1 is the contour of the image frame
+    return len(contours) - num_connected_parts  # -1 is the contour of the image frame
 
 
 def Height_Width_Ratio(img):
@@ -63,13 +63,13 @@ def Max_transition_rows(img):
     # MaxTransitionIndex = Base_INDEX
     for i in range(img.shape[0]):  # loop on Each row
         CurrTransitionRow = 0
-        flag = 1
+        flag = 0
         for j in range(img.shape[1]):  # loop on coloumns for specific row
-            if flag == 1 and img[i, j] == 0:
-                flag = 0
-                CurrTransitionRow += 1
-            elif flag == 0 and img[i, j] == 1:
+            if flag == 0 and img[i, j] == 1:
                 flag = 1
+                CurrTransitionRow += 1
+            elif flag == 1 and img[i, j] == 0:
+                flag = 0
                 CurrTransitionRow += 1
 
         if CurrTransitionRow >= MaxTransition:
@@ -85,13 +85,13 @@ def Max_transition_colomns(img):
     # MaxTransitionIndex = Base_INDEX
     for i in range(img.shape[1]):  # loop on each coloumn
         CurrTransitionCol = 0
-        flag = 1
+        flag = 0
         for j in range(img.shape[0]):  # loop on rows for specific coloumn
-            if flag == 1 and img[j, i] == 0:
-                flag = 0
-                CurrTransitionCol += 1
-            elif flag == 0 and img[j, i] == 1:
+            if flag == 0 and img[j, i] == 1:
                 flag = 1
+                CurrTransitionCol += 1
+            elif flag == 1 and img[j, i] == 0:
+                flag = 0
                 CurrTransitionCol += 1
 
         if CurrTransitionCol >= MaxTransition:
