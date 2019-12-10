@@ -5,14 +5,14 @@ from scipy import ndimage
 def findLetterContourArea(img):
     # This function finds the contours of a given image and returns it in the variable contours.
     # This function will not work correctly unless you preprocess the image properly as indicated.
-#    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
- #   ret,thresh = cv2.threshold(gray,50,255,cv2.THRESH_BINARY)
-    #SE=np.ones((3,3))
-    #img=Opening(img, SE)
-    #show_images([img])
+    #    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    #   ret,thresh = cv2.threshold(gray,50,255,cv2.THRESH_BINARY)
+    # SE=np.ones((3,3))
+    # img=Opening(img, SE)
+    # show_images([img])
     contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     print(len(contours))
-    #print(contours[0])
+    # print(contours[0])
     framearea = cv2.contourArea(contours[0])
     # TODO: Find the contour area of the given image (img) (~1 line)
     maxArea = 0
@@ -25,20 +25,22 @@ def findLetterContourArea(img):
     return maxArea, contours[index], framearea
 
 
-def Count_connected_parts(img):  # this function returns the number of connected parts given the binary image of any letter
-    labeled, nr_objects = ndimage.label(img < 1)  # 100 is the threshold but in case of binary image given (0,1) it will change
+def Count_connected_parts(
+        img):  # this function returns the number of connected parts given the binary image of any letter
+    labeled, nr_objects = ndimage.label(
+        img > 0)  # 100 is the threshold but in case of binary image given (0,1) it will change
     # print(nr_objects)
     # print("Number of objects is {}".format(nr_objects))
     return nr_objects
 
 
 def count_holes(img, num_connected_parts):  # count number of holes in each character
-   # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    #gray = np.copy(img)
-    #kernel = np.ones((3,3),np.float32)/9
-   # dst = cv2.filter2D(gray,-1,kernel)
-   # print(img)
-   # ret,thresh1 = cv2.threshold(img,50,255,cv2.THRESH_BINARY)
+    # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # gray = np.copy(img)
+    # kernel = np.ones((3,3),np.float32)/9
+    # dst = cv2.filter2D(gray,-1,kernel)
+    # print(img)
+    # ret,thresh1 = cv2.threshold(img,50,255,cv2.THRESH_BINARY)
 
     contours, hierarchy = cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     # print("y= ",len(contours)-1-num_connected_parts)
@@ -57,9 +59,6 @@ def Height_Width_Ratio(img):
 
 
 def Max_transition_rows(img):
-    #  gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    #  ret, img = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY)
-
     MaxTransition = 0
     # MaxTransitionIndex = Base_INDEX
     for i in range(img.shape[0]):  # loop on Each row
@@ -74,7 +73,6 @@ def Max_transition_rows(img):
                 CurrTransitionRow += 1
 
         if CurrTransitionRow >= MaxTransition:
-            # MaxTransitionIndex = i
             MaxTransition = CurrTransitionRow
     return MaxTransition
 
@@ -97,18 +95,19 @@ def Max_transition_colomns(img):
                 CurrTransitionCol += 1
 
         if CurrTransitionCol >= MaxTransition:
-            # MaxTransitionIndex = i
             MaxTransition = CurrTransitionCol
     return MaxTransition
 
 
 def Extracting_features(img):
+    img[img > 1] = 1
+    img = img.astype('uint8')
     num_parts = Count_connected_parts(img)
     holes = count_holes(img, num_parts)
     h_W = Height_Width_Ratio(img)
     vertical_trans = Max_transition_colomns(img)
     horizontal_trans = Max_transition_rows(img)
-    return [num_parts, holes, h_W, vertical_trans, horizontal_trans]
+    return [num_parts, holes, h_W[0], vertical_trans, horizontal_trans]
 
 # img=io.imread("test character letters/heh.png")
 # h_w,r=Height_Width_Ratio(image)

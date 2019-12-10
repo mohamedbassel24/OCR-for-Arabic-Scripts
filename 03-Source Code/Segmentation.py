@@ -133,8 +133,9 @@ def getCharImages(Word, ShowSteps):
     img = np.copy(partition)
     partition = skeletonize(partition * 255)
 
-    #   SE=np.ones((2,2))
-    #  partition = convolve2d(partition, SE)
+    # SE=np.ones((2,2))
+    # Word = convolve2d(Word, SE)
+    # Word[Word > 0] = 1
     partition[partition > 0] = 1
 
     # partition = skeletonize(partition * 255)
@@ -324,11 +325,10 @@ def getCharImages(Word, ShowSteps):
 
     start = partition.shape[1]
     for Cut in ListOfCuts:
-        partition_Char = partition[:, Cut:start]
+        partition_Char = Word[:, Cut:start]
         start = Cut
         Characters.append(partition_Char)
     #  show_images([1 - partition_Char], ["SubChar"])
-
 
     if ShowSteps:
         show_images([255 - partition, img], ["SubWord", "Smoothing"])
