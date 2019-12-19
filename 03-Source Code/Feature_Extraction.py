@@ -13,6 +13,8 @@ def findLetterContourArea(img):
     contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
  #   print(len(contours))
     # print(contours[0])
+    if len(contours)==0:
+        return -1,-1,-1
     framearea = cv2.contourArea(contours[0])
     # TODO: Find the contour area of the given image (img) (~1 line)
     maxArea = 0
@@ -50,6 +52,8 @@ def count_holes(img, num_connected_parts):  # count number of holes in each char
 def Height_Width_Ratio(img):
     area, letter_contour, framearea = findLetterContourArea(img)
     whiteArea = framearea - area
+    if area ==-1:
+        return 0
     x, y, w, h = cv2.boundingRect(letter_contour)
     # print(x)
     # print(y)

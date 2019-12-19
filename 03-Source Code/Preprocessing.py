@@ -2,10 +2,8 @@ from commonfunctions import *
 
 
 def Preprocess(img, showSteps):
-
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     gray = cv2.bitwise_not(gray)
-
     # threshold the image, setting all foreground pixels to
     # 255 and all background pixels to 0
     thresh = cv2.threshold(gray, 0, 255,
@@ -24,31 +22,11 @@ def Preprocess(img, showSteps):
     M = cv2.getRotationMatrix2D(center, angle, 1.0)
     rotated = cv2.warpAffine(img, M, (w, h),
                              flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
-
     rotated = cv2.cvtColor(rotated, cv2.COLOR_BGR2GRAY)
-
     _, threshold = cv2.threshold(rotated, 155, 255, cv2.THRESH_BINARY)
     img_gray = rotated
     mean_c = cv2.adaptiveThreshold(img_gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 15, 12)
     gaus = cv2.adaptiveThreshold(img_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 91, 12)
-
-    # img = skeletonize(partition * 255)
-    # SE=np.ones((2,2))
-    # Word = convolve2d(Word, SE)
-    # Word[Word > 0] = 1
-    # partition = skeletonize(partition * 255)
-    # partition = thin(partition * 255,500)
-    # sk_thin_5 = thin(partition, 5)ss['[['
-    #   partition[partition > 0] = 1
-
-    #  SE[1,1]=1
-    #    SE[1, 2] = 1
-    # partition = my_dilation(partition, SE)
-    #    partition=my_erosion(partition,SE)
-    # partition=Opening(partition,SE)
-    # partition = thin(partition , 0.00001)
-    #   partition=1-partition
-
     GlobalThresh = threshold_otsu(rotated) - 100
     ThreshImage = np.copy(rotated)
     ThreshImage[rotated >= GlobalThresh] = 0
@@ -56,3 +34,13 @@ def Preprocess(img, showSteps):
     if showSteps:
         show_images([255 - img, ThreshImage], ["Orignal Image ", "After Threholding And rotation"])
     return 255 - threshold
+def Preprocesss_text(Text):
+    """this function is converting لا into x"""
+    if "لا" in Text:
+        Text=Text.replace('لا', 'ؤ')
+      #  Text=Text[::-1]
+    return Text
+#Str__="لا الله الا لله"
+#print(Str__)
+#Str__=Preprocesss_text(Str__)
+#print(Preprocesss_text(Str__))

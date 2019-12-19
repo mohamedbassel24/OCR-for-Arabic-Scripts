@@ -2,9 +2,10 @@
 from skimage.morphology import binary_erosion, binary_dilation, binary_closing, skeletonize, thin
 from scipy import stats
 from Feature_Extraction import *
+from scipy.ndimage import gaussian_filter
 
 
-def SegementedImageLines(img, rShowSteps):
+def SegmentedImageLines(img, rShowSteps):
     """" Given The Image get The text per line """
     # hist = cv2.reduce(thresh, 0, cv2.REDUCE_AVG).reshape(-1)
     #  plt.hist(thresh.ravel(), 256, [0, 255])
@@ -112,15 +113,7 @@ def getWordImages(ListofImageLines, rShowSteps):
     return ListOfWordsPerLine
 
 
-def StrokeDetection(char_img):
-    # feature 1
-    # feature 2
-    # feature 3
-    # feature 4
-    return 1
-
-
-def getCharImages(Word, ShowSteps):
+def getCharImages(Word, ShowSteps, WordTextIndex):
     """" GET Char per Word """
     WordCount = 0
     Characters = []
@@ -130,14 +123,21 @@ def getCharImages(Word, ShowSteps):
     height = int(Word.shape[0] * scale_percent / 100)
     dim = (width, height)
     # resize image
-   # Word = cv2.resize(Word, dim, interpolation=cv2.INTER_AREA)
+    # Word = cv2.resize(Word, dim, interpolation=cv2.INTER_AREA)
 
     partition = np.copy(Word)
     # PreProcessing for the word ======================>
     img = np.copy(partition)
     partition = skeletonize(partition * 255)
+    #  partition=thin(partition,max_iter=1)
+    # partition=1-partition
+    # partition=gaussian_filter(partition, sigma=0.2)
     partition[partition > 0] = 1
+    # show_images([partition], ["wee"])
+  #  if ShowSteps:
+   #     show_images([partition, img], ["SubWord (" + str(WordCount + 1) + " )", "Smoothing"])
     # BASELINE DETECTION =>
+
     MAX = 0
     Base_INDEX = 0
     for i in range(partition.shape[0]):
@@ -172,8 +172,6 @@ def getCharImages(Word, ShowSteps):
     flag = 0
     ListOfCuts = []
     FirstRegion = True
-    if ShowSteps:
-        show_images([partition, img], ["SubWord (" + str(WordCount + 1) + " )", "Smoothing"])
     WordCount += 1
     # Background => zero Word =>1
     for i in range(partition.shape[1]):  # loop on the parition Col
@@ -184,13 +182,13 @@ def getCharImages(Word, ShowSteps):
             EndIndex = i  # End of my Cut
             flag = 0
             MiddleIndex = int((StartIndex + EndIndex) / 2)  # average
-            if abs(StartIndex - EndIndex) < 2 or StartIndex == 0:  # Skip the first cut between nothing and char
+            if StartIndex == 0 and abs(StartIndex - EndIndex) < 5:  # abs(StartIndex - EndIndex) < 2 or  # Skip the first cut between nothing and char
                 continue
-            if FirstRegion:  # First region needs a special handling for char like ب ى ت
-                if np.sum(partition[:, :StartIndex - 1]) > 5:
-                    FirstRegion = False
+            #if FirstRegion:  # First region needs a special handling for char like ب ى ت
+             #   if np.sum(partition[:, :StartIndex - 1]) > 5:
+              #      FirstRegion = False
 
-            if WordCount == 2:  # For debuging search for a specifc word
+            if WordTextIndex == -1:  # For debuging search for a specific word
                 print("This is a dummy condition for Debuging")
 
             SHPA = np.sum(
@@ -214,11 +212,14 @@ def getCharImages(Word, ShowSteps):
                 continue
             if FirstRegion:
                 SHPA = np.sum(partition[0:Base_INDEX - 1,
-                              StartIndex:EndIndex])  # SUM OF HORIZONTAL PROJECTION Above BaseLine
+                              0:EndIndex])  # SUM OF HORIZONTAL PROJECTION Above BaseLine
                 SHPB = np.sum(partition[Base_INDEX:,
-                              StartIndex:EndIndex])  # SUM OF HORIZONTAL PROJECTION Above BaseLine
-
+                              0:EndIndex])  # SUM OF HORIZONTAL PROJECTION Above BaseLine
                 FirstRegion = False
+                if SHPA == 0:  # for ya2
+                    if Count_connected_parts(Word[:, :EndIndex]) == 3:
+                        ListOfCuts.insert(0, EndIndex - 3)
+                        continue
                 if SHPA > SHPB and (MFV == np.sum(partition[:, MiddleIndex]) or MFV == np.sum(
                         partition[:, MiddleIndex - 1]) or MFV == np.sum(partition[:, MiddleIndex + 1])):
                     k = StartIndex
@@ -259,14 +260,14 @@ def getCharImages(Word, ShowSteps):
             ThereExistVP = False
             for k in range(abs(StartIndex - EndIndex)):
                 if np.sum(partition[:, StartIndex + k]) <= MFV:
-                    print("Detect MFV")
+                    if ShowSteps:
+                        print("Detect MFV")
                     MiddleIndex = k + StartIndex
                     ThereExistVP = True
                     break
             if ThereExistVP:
                 ListOfCuts.insert(0, MiddleIndex)
                 continue
-            continue
 
             if SHPA > SHPB and MFV == np.sum(partition[:, MiddleIndex]):
                 ListOfCuts.insert(0, MiddleIndex)
@@ -275,15 +276,19 @@ def getCharImages(Word, ShowSteps):
             ListOfCuts.insert(0, MiddleIndex)
 
     # Do Filteration here
-    #   print(ListOfCuts)
-    start = partition.shape[1]
 
+    start = partition.shape[1]
     # Remove Cut for stroke =>
-    for i in range(len(ListOfCuts) - 3):
+    for i in range(len(ListOfCuts) ):
         partition_Char = Word[:, ListOfCuts[i] + 1:start]
         start = ListOfCuts[i]
-        if IsStroke(partition_Char, MFV):
-            Old_Start=start
+        Binary_Word = np.copy(Word)
+        Binary_Word[Binary_Word > 0] = 1
+        m = stats.mode([sum(x) for x in zip(*Binary_Word)])
+        MFV_Before = m[0][0]  # skeleton
+
+        if IsStroke(partition_Char, MFV_Before) and i+2 <len(ListOfCuts) :
+            Old_Start = start
             partition_Char_After = Word[:, ListOfCuts[i + 1] + 1:start]
             start = ListOfCuts[i + 1]
             partition_Char_2ndAfter = Word[:, ListOfCuts[i + 2] + 1:start]
@@ -291,10 +296,14 @@ def getCharImages(Word, ShowSteps):
             if IsStroke(partition_Char_After, MFV) or IsStroke(partition_Char_2ndAfter, MFV):
                 ListOfCuts[i] = -1
                 ListOfCuts[i + 1] = -1  # false cut
+                i += 2
             else:
-                start=Old_Start
-            #i += 3
+                start = Old_Start
+        if IsDal(partition_Char):
+            ListOfCuts[i - 1] = -1
 
+
+            # i += 3
 
     StrokeList = []
     if ShowSteps:
@@ -304,11 +313,10 @@ def getCharImages(Word, ShowSteps):
             img[:, Cut] = np.ones(img.shape[0]) * 150
 
     if ShowSteps:
-        show_images([partition, img], ["SubWord (" + str(WordCount) + " )", "Smoothing"])
+        show_images([partition, img], ["SubWord (" + str(WordTextIndex) + " )", "Smoothing"])
 
     ListOfCuts.append(0)
     #      print(ListOfCuts)
-
 
     start = partition.shape[1]
     for Cut in ListOfCuts:
@@ -317,12 +325,12 @@ def getCharImages(Word, ShowSteps):
         partition_Char = Word[:, Cut + 1:start]
         start = Cut
         Characters.append(partition_Char)
-      #  show_images([partition_Char], ["SubChar"])
-      #  show_images([partition_Char], ["SubChar"])
+    #  show_images([partition_Char], ["SubChar"])
+    #  show_images([partition_Char], ["SubChar"])
 
-    print(StrokeList)
-    if ShowSteps:
-        show_images([partition, img], ["SubWord", "Smoothing"])
+    #if ShowSteps:
+       # print(StrokeList)
+       # show_images([partition, img], ["SubWord", "Smoothing"])
     return Characters
 
 
@@ -340,8 +348,8 @@ def IsStroke(Parition, MFV):
     height = int(Parition.shape[0] * scale_percent / 100)
     dim = (width, height)
     # resize image
-    resized = cv2.resize(Parition, dim, interpolation=cv2.INTER_AREA)
-   #     show_images([resized], ["We ?"])
+#resized = cv2.resize(Parition, dim, interpolation=cv2.INTER_AREA)
+    #     show_images([resized], ["We ?"])
     # cv2.re
 
     Count_Components = Count_connected_parts(Parition)
@@ -361,6 +369,8 @@ def IsStroke(Parition, MFV):
         return False
     area, letter_contour, framearea = findLetterContourArea(Parition)
     whiteArea = framearea - area
+    if area ==-1:
+        return False
     x, y, w, h = cv2.boundingRect(letter_contour)
     MaxHorizontalProjection = 0
     HorizontalList = []
@@ -371,16 +381,39 @@ def IsStroke(Parition, MFV):
             HorizontalList.append(MaxHorizontalProjection)
     SecondMVP = 0
     if len(HorizontalList) < 2:
-        return False
-    SecondMVP = HorizontalList[-2]
+        SecondMVP = HorizontalList[-1]
+    else:
+        SecondMVP = HorizontalList[-2]
     # sub from baseline ?
     if h - Base_INDEX > SecondMVP * 2:
         return False
+   # print(h-Base_INDEX)
+   # if h >5:
+    #    return False
     m = stats.mode([sum(x) for x in zip(*Parition)])
-    #    if m[0][0] != MFV:
-    #       return False
+    if m[0][0] != MFV:
+    #    print(MFV, m[0][0])
+        return False
     # NO HOLES =>
     if count_holes(Parition, Count_Components) > 0:
         return False
-
+    #  print("Is Stroke ")
     return True
+
+
+def StrokeDetection(char_img):
+    # feature 1
+    # feature 2
+    # feature 3
+    # feature 4
+    return 1
+
+
+def IsDal(char_img):
+    """" This function to detect the stroke in dal """
+    Count_White = np.sum(char_img == 1)
+    if (Count_White < 3):
+        #print("Is dal")
+        return True
+
+    return False
