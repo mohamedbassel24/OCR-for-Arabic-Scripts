@@ -36,10 +36,15 @@ def SVM_Non_linear_Classifier(X_train, y_train,
 
 
 X, Y = ReadModel("data_point")
-print(X)
-print(Y)
-# X1=numpy.matrix([[1, 2,3], [3, 4,6]])
-# y1=[0,1]
+
+X1 = np.matrix([[1, 2, 3], [3, 4, 6]])
+y1 = [0, 1]
+Ylist = []
+for i in range(Y.shape[0]):
+    Ylist.append(Y[i])
+SVM_linear_Classifier(X, Ylist, X1)
+print(X1.shape, X.shape)
+print(len(y1), Y.shape)
 # X2=numpy.matrix([[7,0,1],[3,4,6]])
 # y2=SVM_linear_Classifier(X1,y1,X2)
 # y3=SVM_Non_linear_Classifier(X1,y1,X2)
