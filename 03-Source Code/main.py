@@ -1,6 +1,7 @@
 from Preprocessing import *
 from Segmentation import *
 from File_Accessing import *
+from classifiers import *
 
 # TODO: Create Dictionary for each Letter corresponding class# DONE
 # TODO:Choose a best classier
@@ -8,7 +9,7 @@ from File_Accessing import *
 # TODO: impalement a logic for a testing
 # TODO:Convert each  la to X in text image DONE
 # TODO: # of segemented words != text word (bongo)
-#TODO: handle RuntimeWarning: overflow encountered in ulong_scalars
+# TODO: handle RuntimeWarning: overflow encountered in ulong_scalars
 
 # Model Variables =>
 alphabetic_Dict = {0: 'ا', 1: 'ب', 2: 'ت', 3: 'ث', 4: 'ج', 5: 'ح', 6: 'خ', 7: 'د', 8: 'ذ', 9: 'ر', 10: 'ز', 11: 'س',
@@ -17,7 +18,7 @@ alphabetic_Dict = {0: 'ا', 1: 'ب', 2: 'ت', 3: 'ث', 4: 'ج', 5: 'ح', 6: 'خ'
 classifier_list = list(alphabetic_Dict.keys())
 alphabetic_list = list(alphabetic_Dict.values())
 Operation_Mode = ["Training-Mode", "Test-Mode"]
-Model_Mode = 0
+Model_Mode = 1
 Running_Time = []  # Representing the running time for each file
 ShowSteps = 0  # Representing the steps of each block
 
@@ -57,19 +58,21 @@ if Model_Mode == 0:  # Training MODE
                     Train_Set.append(Labeled_Feature)
                 WordTextIndex += 1
         end_time = time.time()
-        print(WordTextIndex,len(TextImage))
+        print(WordTextIndex, len(TextImage))
         print("Appending to training set with accuracy of char segmentation =>",
               ((WordTextIndex - Fault_Segement) / WordTextIndex) * 100, " % Running Time:", end_time - start_time,
               "for File " + filename[-9:])
         Append_TraingSET(Train_Set)
 else:
-    filename = "csep1220.png"  # Test Image
+    filename = "capr3.png"  # Test Image
     SegmentedLines = []  # Rows represent Line#
     SegmentedWordsPerLine = []  # Rows represent Line# and Col represent Words belong to # Line
     SegmentedCharacters = []  # Rows represent Characters
     img = cv2.imread(filename)  # Reading the Image
     WordTextIndex = 0  # representing the #word in the text_file as we are moving sequential in the file
     Output_Text = []  # representing arabic text i will classify
+    # READ MODEL
+    X, Y = ReadModel("data_point")
     # Pre processing
     start_time = time.time()
     img = Preprocess(img, ShowSteps)
@@ -78,24 +81,21 @@ else:
     SegmentedWordsPerLine = getWordImages(SegmentedLines, ShowSteps)
     for SegmentedWords in SegmentedWordsPerLine:
         for Word in SegmentedWords:
-            Word_Text=""
+            Word_Text = ""
             CharactersPerWord = []
             CharactersPerWord = getCharImages(Word, ShowSteps, WordTextIndex)
-            TextImage[WordTextIndex] = Preprocesss_text(TextImage[WordTextIndex])
             for Char in CharactersPerWord:
                 Char_Feature = Extracting_features(Char)
                 # TODO:Call Classifier with Char Feature and returns label
-                myClassifier=0# assume class zero is classified
-                Char_Classified=""
-                if myClassifier==28:
-                    Char_Classified="لا"
+                myClassifier = SVM_Non_linear_Classifier(X, Y, Char_Feature)  # assume class zero is classified
+                Char_Classified = ""
+                if myClassifier == 28:
+                    Char_Classified = "لا"
                 else:
-                    Char_Classified=alphabetic_Dict[myClassifier]
-                Word_Text+=Char_Classified # Change the order of this if its reversed
-            Output_Text=" "+Word_Text+Output_Text
-        Output_Text="\n"+Output_Text
+                    Char_Classified = alphabetic_Dict[myClassifier]
+                Word_Text += Char_Classified  # Change the order of this if its reversed
+            Output_Text = " " + Word_Text + Output_Text
+        Output_Text = "\n" + Output_Text
 
     end_time = time.time()
-    #TODO: Wtite Function to write in the output file
-
-
+    # TODO: Wtite Function to write in the output file
