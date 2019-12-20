@@ -37,8 +37,9 @@ if Model_Mode == 0:  # Training MODE
         start_time = time.time()
         img = Preprocess(img, ShowSteps)
         # Start Segmentation
-        SegmentedLines = SegmentedImageLines(img, ShowSteps)
+        SegmentedLines = SegmentedImageLines(img, 0)
         SegmentedWordsPerLine = getWordImages(SegmentedLines, ShowSteps)
+        print("Length of Segmented: ", len(SegmentedLines))
         for SegmentedWords in SegmentedWordsPerLine:
             for Word in SegmentedWords:
                 CharactersPerWord = []
@@ -56,6 +57,7 @@ if Model_Mode == 0:  # Training MODE
                     Train_Set.append(Labeled_Feature)
                 WordTextIndex += 1
         end_time = time.time()
+        print(WordTextIndex,len(TextImage))
         print("Appending to training set with accuracy of char segmentation =>",
               ((WordTextIndex - Fault_Segement) / WordTextIndex) * 100, " % Running Time:", end_time - start_time,
               "for File " + filename[-9:])

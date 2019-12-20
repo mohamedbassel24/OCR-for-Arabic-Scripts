@@ -88,7 +88,7 @@ def getWordImages(ListofImageLines, rShowSteps):
         if rShowSteps:
             print(stats)
 
-        stats = stats[(stats[:, cv2.CC_STAT_WIDTH] > 1) & (stats[:, cv2.CC_STAT_AREA] > 8)]
+        stats = stats[(stats[:, cv2.CC_STAT_WIDTH] >= 1) & (stats[:, cv2.CC_STAT_AREA] > 10)]
         j = 1
         ListOfWords = []
         while (True):
