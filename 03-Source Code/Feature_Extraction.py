@@ -98,6 +98,9 @@ def Max_transition_colomns(img):
             MaxTransition = CurrTransitionCol
     return MaxTransition
 
+def White_Black_ration(img):
+    return len(img[ img == 1 ] / len(img[ img == 0 ]))
+
 
 def Extracting_features(img):
     img[img > 1] = 1
@@ -107,4 +110,11 @@ def Extracting_features(img):
     h_W = Height_Width_Ratio(img)
     vertical_trans = Max_transition_colomns(img)
     horizontal_trans = Max_transition_rows(img)
+    #ratio1 = White_Black_ration(img)
+    #ratio2 = White_Black_ration(img[0 : int(img.shape[0] / 2) , 0 : int(img.shape[1] / 2)])
+    #ratio3 = White_Black_ration(img[int(img.shape[0] / 2)+1 : img.shape[0] , int(img.shape[1] / 2)+1 : img.shape[1]])
+
     return [num_parts, holes, h_W, vertical_trans, horizontal_trans]
+
+#img=io.imread("test character letters/beh.png")
+#x=Extracting_features(img)

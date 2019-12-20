@@ -74,6 +74,7 @@ else:
     # READ MODEL
     X, Y = ReadModel("data_point")
     # Pre processing
+    SVM_Model=SVM_linear_training(X[0:30000,:],Y[0:30000])
     start_time = time.time()
     img = Preprocess(img, ShowSteps)
     # Start Segmentation
@@ -87,12 +88,15 @@ else:
             for Char in CharactersPerWord:
                 Char_Feature = Extracting_features(Char)
                 # TODO:Call Classifier with Char Feature and returns label
-                myClassifier = SVM_Non_linear_Classifier(X, Y, Char_Feature)  # assume class zero is classified
+                #print(X[0:100,:])
+                #print(Y)
+                myClassifier = SVM_Classifier(SVM_Model, [Char_Feature])  # assume class zero is classified
+                print(myClassifier)
                 Char_Classified = ""
                 if myClassifier == 28:
                     Char_Classified = "لا"
                 else:
-                    Char_Classified = alphabetic_Dict[myClassifier]
+                    Char_Classified = alphabetic_Dict[myClassifier[0]]
                 Word_Text += Char_Classified  # Change the order of this if its reversed
             Output_Text = " " + Word_Text + Output_Text
         Output_Text = "\n" + Output_Text

@@ -44,7 +44,7 @@ def ReadModel(FileName):
 
         # plitLine.append(FileContents[i].split(' '))
     # print(splitLine)
-    return splitLine[:, 0:4], splitLine[:, 5]
+    return splitLine[:, 0:5], splitLine[:, 5]
 
 
 
