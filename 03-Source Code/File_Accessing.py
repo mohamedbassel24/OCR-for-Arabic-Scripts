@@ -47,4 +47,7 @@ def ReadModel(FileName):
     return splitLine[:, 0:5], splitLine[:, 5]
 
 
-
+def Write_ClassifiedText(Text): #TODO: take file name
+    """ This function to append new training point to our data set"""
+    f = open("Img_TEXT.txt", "w")
+    f.write(Text)
