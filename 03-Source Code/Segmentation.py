@@ -134,7 +134,7 @@ def myVersion_GetWORDS(ListofImageLines, rShowSteps):
                         continue
                     else:
                         # show_images([IMG_Line[:, start:end]],["1"])
-                        ListOfWords.insert(0, IMG_Line[:, start:end])
+                        ListOfWords.insert(0, IMG_Line[:, start:min(end+1,IMG_Line.shape[1]-1)])
 
                         # print(start, end)
 
