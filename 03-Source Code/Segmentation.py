@@ -124,31 +124,30 @@ def myVersion_GetWORDS(ListofImageLines, rShowSteps):
         for Col in range(IMG_Line.shape[1]):
             VP.append(np.sum(IMG_Line[:, Col]))
         MaxVP = []
-        ListOfWords=[]
-        start=-1
-        end=-1
+        ListOfWords = []
+        start = -1
+        end = -1
         for i in range(len(VP)):
-            if(VP[i]==0):
-                if(start>0 and end>0):
-                    if(i-end<3):
+            if (VP[i] == 0):
+                if (start > 0 and end > 0):
+                    if (i - end < 3):
                         continue
                     else:
-                        #show_images([IMG_Line[:, start:end]],["1"])
+                        # show_images([IMG_Line[:, start:end]],["1"])
                         ListOfWords.insert(0, IMG_Line[:, start:end])
 
-                        #print(start, end)
+                        # print(start, end)
 
-                start=-1
-                end=-1
+                start = -1
+                end = -1
                 continue
-            elif(VP[i]>0):
-                if(start==-1):
-                    start=i
+            elif (VP[i] > 0):
+                if (start == -1):
+                    start = i
                 else:
-                    end=i
+                    end = i
 
         ListOfWordsPerLine.append(ListOfWords)
-
 
     return ListOfWordsPerLine
 
@@ -188,7 +187,7 @@ def get_MTI(img):
 
 def getCharImages(Word, ShowSteps, WordTextIndex):
     """" GET Char per Word """
-    Word=255*Word
+    Word = 255 * Word
     WordCount = 0
     Characters = []
 
@@ -236,7 +235,7 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
             if StartIndex == 0:  # abs(StartIndex - EndIndex) < 2 or  # Skip the first cut between nothing and char
                 continue
             if WordTextIndex == -1:  # For debuging search for a specific word
-                print("This is a dummy condition for Debuging")
+                print("This is a dummy condition for Debugging")
 
             SHPA = np.sum(
                 partition[0:Base_INDEX - 1, :MiddleIndex])  # SUM OF HORIZONTAL PROJECTION Above BaseLine
@@ -334,14 +333,14 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
                 elif ThereExistVP:
                     ListOfCuts.insert(0, MiddleIndex)  # The 3rd Separation region is valid
                 else:
-                    continue
+                    ListOfCuts.insert(0, MiddleIndex)  # The 3rd Separation region is valid
 
     for Cut in ListOfCuts:
         if Cut == -1:
             continue
         img2[:, Cut] = np.ones(img.shape[0]) * 150
 
-    # show_images([img2], ["After filterintg"])
+   # show_images([img2], ["After filterintg"])
 
     # Do Filteration here
     if WordTextIndex == -1:  # For debuging search for a speci
@@ -359,7 +358,10 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
     if len(ListOfCuts) > 0:
         Binary_Word = np.copy(Word[:, 0: ListOfCuts[-1]])
         Binary_Word[Binary_Word > 0] = 1
-        if IsDal(Binary_Word) or ListOfCuts[-1] < 4:
+
+        LargeHeight = np.sum(Binary_Word[5, :])
+
+        if (IsDal(Binary_Word) or ListOfCuts[-1] < 4) and not LargeHeight:
             ListOfCuts.pop()
 
     start = partition.shape[1]
@@ -431,7 +433,7 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
         Characters.append(partition_Char)
     #  show_images([partition_Char], ["SubChar"])
     #  show_images([partition_Char], ["SubChar"])
-    # show_images([partition, img], ["SubWord (" + str(WordTextIndex) + " )", "Smoothing"])
+   # show_images([partition, img], ["SubWord (" + str(WordTextIndex) + " )", "Smoothing"])
 
     # if ShowSteps:
     # print(StrokeList)
@@ -454,9 +456,21 @@ def IsStroke(Parition, MFV, Base_INDEX):
     # Parition = skeletonize(Parition * 255)
     #    show_images([Parition])
     X = myStroke(Parition)
+    SHPB = np.sum(Parition[Base_INDEX + 1:])  # SUM OF HORIZONTAL PROJECTION Above BaseLine
+
+    MaxHorizontalProjection = 0
+    HorizontalList = []
+    for row in range(np.shape(Parition)[0]):
+        CurrProjection = np.sum(Parition[row])
+        if row < 5 and CurrProjection != 0:
+            return False
+        if CurrProjection > MaxHorizontalProjection:
+            MaxHorizontalProjection = CurrProjection
+            HorizontalList.append(MaxHorizontalProjection)
+
     if X > 20 and X <= 4:
         return False
-    if X < 9:
+    if X < 9 and SHPB:
         return True
     Parition[Parition > 0] = 1
     # Parition=1-Parition
@@ -465,17 +479,12 @@ def IsStroke(Parition, MFV, Base_INDEX):
     """" DETECT if the char is stroke"""
     # SINGLE COMPONENT =>
 
-    scale_percent = 200  # percent of original size
-    width = int(Parition.shape[1] * scale_percent / 100)
-    height = int(Parition.shape[0] * scale_percent / 100)
-    dim = (width, height)
-
     Count_Components = Count_connected_parts(Parition)
     if Count_Components > 1:
         return False
 
     SHPA = np.sum(Parition[0:Base_INDEX - 1])  # SUM OF HORIZONTAL PROJECTION Above BaseLine
-    SHPB = np.sum(Parition[Base_INDEX + 1:])  # SUM OF HORIZONTAL PROJECTION Above BaseLine
+
     if SHPB > SHPA:
         return False
     area, letter_contour, framearea = findLetterContourArea(Parition)
@@ -483,15 +492,7 @@ def IsStroke(Parition, MFV, Base_INDEX):
     if area == -1:
         return False
     x, y, w, h = cv2.boundingRect(letter_contour)
-    MaxHorizontalProjection = 0
-    HorizontalList = []
-    for row in range(np.shape(Parition)[0]):
-        CurrProjection = np.sum(Parition[row])
-        if row < 8 and CurrProjection != 0:
-            return False
-        if CurrProjection > MaxHorizontalProjection:
-            MaxHorizontalProjection = CurrProjection
-            HorizontalList.append(MaxHorizontalProjection)
+
     SecondMVP = 0
     if len(HorizontalList) < 2:
         SecondMVP = HorizontalList[-1]
