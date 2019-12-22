@@ -128,9 +128,9 @@ def myVersion_GetWORDS(ListofImageLines, rShowSteps):
         start = -1
         end = -1
         for i in range(len(VP)):
-            if (VP[i] == 0):
-                if (start > 0 and end > 0):
-                    if (i - end < 3):
+            if VP[i] == 0:
+                if start > 0 and end > 0:
+                    if i - end < 3:
                         continue
                     else:
                         # show_images([IMG_Line[:, start:end]],["1"])
@@ -241,6 +241,10 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
                 partition[0:Base_INDEX - 1, :MiddleIndex])  # SUM OF HORIZONTAL PROJECTION Above BaseLine
             SHPB = np.sum(
                 partition[Base_INDEX + 1:, :MiddleIndex])  # SUM OF HORIZONTAL PROJECTION Above BaseLine
+            if FirstRegion and SHPA > 2:
+                sumPre = np.sum(partition[:, :EndIndex])
+                if sumPre > 20:
+                    FirstRegion = False
 
             # for space separation
             ThereIsGap = False
@@ -334,16 +338,16 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
                     ListOfCuts.insert(0, MiddleIndex)  # The 3rd Separation region is valid
                 else:
                     ListOfCuts.insert(0, MiddleIndex)  # The 3rd Separation region is valid
-
+            ListOfCuts.insert(0, MiddleIndex)  # The 3rd Separation region is valid
     for Cut in ListOfCuts:
         if Cut == -1:
             continue
         img2[:, Cut] = np.ones(img.shape[0]) * 150
 
-   # show_images([img2], ["After filterintg"])
+    #show_images([img2], ["After filterintg"])
 
     # Do Filteration here
-    if WordTextIndex == -1:  # For debuging search for a speci
+    if WordTextIndex == -1:  # For debuging search for a specific word :'(((((((((((((((((((((((((((((
         print("This is a dummy condition for Debuging")
     # for dal and any stroke at the end
     start = partition.shape[1]
@@ -433,7 +437,7 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
         Characters.append(partition_Char)
     #  show_images([partition_Char], ["SubChar"])
     #  show_images([partition_Char], ["SubChar"])
-   # show_images([partition, img], ["SubWord (" + str(WordTextIndex) + " )", "Smoothing"])
+  #  show_images([partition, img], ["SubWord (" + str(WordTextIndex) + " )", "Smoothing"])
 
     # if ShowSteps:
     # print(StrokeList)
@@ -462,7 +466,7 @@ def IsStroke(Parition, MFV, Base_INDEX):
     HorizontalList = []
     for row in range(np.shape(Parition)[0]):
         CurrProjection = np.sum(Parition[row])
-        if row < 5 and CurrProjection != 0:
+        if row < 7 and CurrProjection != 0:
             return False
         if CurrProjection > MaxHorizontalProjection:
             MaxHorizontalProjection = CurrProjection

@@ -84,7 +84,7 @@ else:
     img = Preprocess(img, ShowSteps)
     # Start Segmentation
     SegmentedLines = SegmentedImageLines(img, ShowSteps)
-    SegmentedWordsPerLine = getWordImages(SegmentedLines, ShowSteps)
+    SegmentedWordsPerLine = myVersion_GetWORDS(SegmentedLines, ShowSteps)
     # myVersion_GetWORDS(SegmentedLines, ShowSteps)
     for SegmentedWords in SegmentedWordsPerLine:
         for Word in SegmentedWords:
