@@ -88,7 +88,7 @@ def getWordImages(ListofImageLines, rShowSteps):
         if rShowSteps:
             print(stats)
 
-        stats = stats[(stats[:, cv2.CC_STAT_WIDTH] >= 1) & (stats[:, cv2.CC_STAT_AREA] > 10)]
+        stats = stats[(stats[:, cv2.CC_STAT_WIDTH] >= 1) & (stats[:, cv2.CC_STAT_AREA] > 9)]
         j = 1
         ListOfWords = []
         while (True):
@@ -117,52 +117,38 @@ def myVersion_GetWORDS(ListofImageLines, rShowSteps):
     """ Given The Images Per Lines Get Words for each Line"""
     ListOfWordsPerLine = []
     for IMG_Line in ListofImageLines:
+
         VP = []
         IMG_Line[IMG_Line > 0] = 1
         IMG_Line = 1 - IMG_Line
-
-        # print(IMG_Line)
         for Col in range(IMG_Line.shape[1]):
             VP.append(np.sum(IMG_Line[:, Col]))
         MaxVP = []
-        currStep = 0
-        for Col in range(IMG_Line.shape[1]):
-            currStep += 1
-            if np.sum(VP[Col]) != 0:
-                MaxVP.append(currStep)
-                currStep = 0
-                while np.sum(VP[Col]) != 0:
-                    Col += 1
+        ListOfWords=[]
+        start=-1
+        end=-1
+        for i in range(len(VP)):
+            if(VP[i]==0):
+                if(start>0 and end>0):
+                    if(i-end<3):
+                        continue
+                    else:
+                        #show_images([IMG_Line[:, start:end]],["1"])
+                        ListOfWords.insert(0, IMG_Line[:, start:end])
 
-        print()
-        new_list = set(MaxVP)
-        # removing the largest element from temp list
-        new_list.remove(max(new_list))
+                        #print(start, end)
 
-        MaxSpace = max(MaxVP[1:len(MaxVP) - 1])
-        WordList = []
-        currStep = 0
-        IsFirstGap = True
-        StartTaken = False
-        Col=0
-        while Col < (IMG_Line.shape[1]):
-            currStep += 1
-            if (abs(currStep-MaxSpace) <5) and not IsFirstGap:
-                StartTaken = False
-                WordList.append(IMG_Line[:, Start:End])
-                show_images([IMG_Line[:, Start:End]])
-                currStep=0
-            if np.sum(VP[Col]) != 0:
-                currStep = 0
-                IsFirstGap = False
-                if not StartTaken:
-                    Start = Col
-                    StartTaken = True
+                start=-1
+                end=-1
+                continue
+            elif(VP[i]>0):
+                if(start==-1):
+                    start=i
+                else:
+                    end=i
 
-                while np.sum(VP[Col]) != 0:
-                    Col += 1
-                End = Col
-            Col+=1
+        ListOfWordsPerLine.append(ListOfWords)
+
 
     return ListOfWordsPerLine
 
@@ -354,7 +340,7 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
             continue
         img2[:, Cut] = np.ones(img.shape[0]) * 150
 
-   # show_images([img2], ["After filterintg"])
+    # show_images([img2], ["After filterintg"])
 
     # Do Filteration here
     if WordTextIndex == -1:  # For debuging search for a speci
@@ -398,7 +384,7 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
                     IsStroke(partition_Char_After, MFV, Base_INDEX) and i + 1 == len(ListOfCuts) - 1):
                 ListOfCuts[i] = -1
                 ListOfCuts[i + 1] = -1  # false cut
-               # print("س")
+                # print("س")
                 i += 2
             else:
                 start = Old_Start
@@ -444,7 +430,7 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
         Characters.append(partition_Char)
     #  show_images([partition_Char], ["SubChar"])
     #  show_images([partition_Char], ["SubChar"])
-   # show_images([partition, img], ["SubWord (" + str(WordTextIndex) + " )", "Smoothing"])
+    # show_images([partition, img], ["SubWord (" + str(WordTextIndex) + " )", "Smoothing"])
 
     # if ShowSteps:
     # print(StrokeList)

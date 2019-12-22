@@ -37,13 +37,14 @@ if Model_Mode == 0:  # Training MODE
         img = Preprocess(img, ShowSteps)
         # Start Segmentation
         SegmentedLines = SegmentedImageLines(img, 0)
-        SegmentedWordsPerLine = getWordImages(SegmentedLines, ShowSteps)
+        SegmentedWordsPerLine = myVersion_GetWORDS(SegmentedLines, 0)
 
         Count_Word = 0
         for i in range(len(SegmentedWordsPerLine)):
             Count_Word += len(SegmentedWordsPerLine[i])
         print("Image Word#", Count_Word, "Text Word#:", len(TextImage))
         if Count_Word != len(TextImage):
+            print("Error ih file #:"+filename)
             continue
         #print("Length of Segmented: ", len(SegmentedLines))
         for SegmentedWords in SegmentedWordsPerLine:
@@ -59,6 +60,7 @@ if Model_Mode == 0:  # Training MODE
                     Char_Feature = Extracting_features(Char)
                     Labeled_Feature = [Char_Feature, classifier_list[alphabetic_list.index(Char_Text)]]
                     Train_Set.append(Labeled_Feature)
+
                 WordTextIndex += 1
         end_time = time.time()
         print(WordTextIndex, len(TextImage))
