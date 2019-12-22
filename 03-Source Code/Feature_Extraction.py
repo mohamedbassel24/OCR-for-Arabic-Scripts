@@ -106,7 +106,8 @@ def White_Black_ration(img):
         return 1
     return len(img[ img == 1 ]) / len(img[ img == 0 ])
 
-
+def white_number(img):
+    return len(img[ img == 1 ])
 def Extracting_features(img):
     img[img > 1] = 1
     hieght = img.shape[0]
@@ -118,27 +119,32 @@ def Extracting_features(img):
     vertical_trans = Max_transition_colomns(img)
     horizontal_trans = Max_transition_rows(img)
     ratio0 = White_Black_ration(img)
-    if(ratio0==0):
-        ratio0=1
+    white0=white_number(img)
+    if(white0==0):
+        white0=1
     ratio1 = White_Black_ration(img[0 : int(hieght / 2) , 0 : int(width / 2)])
-    if (ratio1 == 0):
-        ratio1 = 1
+    white1 = white_number(img[0 : int(hieght / 2) , 0 : int(width / 2)])
+    if (white1 == 0):
+        white1 = 1
     ratio2 = White_Black_ration(img[0: int(hieght / 2), int(width / 2)+1:width])
-    if (ratio2 == 0):
-        ratio2 = 1
+    white2 = white_number(img[0: int(hieght / 2), int(width / 2)+1:width])
+    if (white2 == 0):
+        white2 = 1
     ratio3 = White_Black_ration(img[int(hieght / 2)+1:hieght, 0: int(width / 2)])
-    if (ratio3 == 0):
-        ratio3 = 1
+    white3 = white_number(img[int(hieght / 2)+1:hieght, 0: int(width / 2)])
+    if (white3 == 0):
+        white3 = 1
     ratio4 = White_Black_ration(img[int(hieght / 2)+1:hieght, int(width / 2)+1:width])
-    if (ratio4 == 0):
-        ratio4 = 1
+    white4 = white_number(img[int(hieght / 2)+1:hieght, int(width / 2)+1:width])
+    if (white4 == 0):
+        white4 = 1
 
-    ratio5 = ratio1/ratio2
-    ratio6 = ratio3/ratio4
-    ratio7 = ratio1/ratio3
-    ratio8 = ratio2/ratio4
-    ratio9 = ratio1/ratio4
-    ratio10 = ratio2/ratio3
+    ratio5 = white1/white2
+    ratio6 = white3/white4
+    ratio7 = white1/white3
+    ratio8 = white2/white4
+    ratio9 = white1/white4
+    ratio10 = white2/white3
 
     #ratio3 = White_Black_ration(img[0: int(hieght / 3),  int(width / 3)+1 : int(2*width / 3)])
     #ratio4 = White_Black_ration(img[0: int(hieght / 3),  int(2*width / 3)+1 : width])

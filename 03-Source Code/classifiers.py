@@ -34,6 +34,13 @@ def SVM_Non_linear_training(X_train, y_train):  # X_train is the training featur
     return svclassifier
 
 
+def SVM_Gaussian(X_train, y_train):
+    svclassifier = SVC(kernel='rbf')
+    svclassifier.fit(X_train, y_train)
+    return svclassifier
+
+
+
 def SVM_Classifier(SVM_Model,X_test):
     return SVM_Model.predict(X_test)
 
