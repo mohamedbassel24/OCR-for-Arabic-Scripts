@@ -116,7 +116,7 @@ def Extracting_features(img):
 
     ratio2 = White_Black_ration(img[0 : int(hieght / 3) , 0 : int(width / 3)])
     ratio3 = White_Black_ration(img[0: int(hieght / 3),  int(width / 3)+1 : int(2*width / 3)])
-    ratio4 =  White_Black_ration(img[0: int(hieght / 3),  int(2*width / 3)+1 : width])
+    ratio4 = White_Black_ration(img[0: int(hieght / 3),  int(2*width / 3)+1 : width])
 
     ratio5 = White_Black_ration(img[int(hieght / 3) + 1: int(2 * hieght / 3), 0 : int(width / 3)])
     ratio6 = White_Black_ration(img[ int(hieght / 3)+1 : int(2*hieght / 3) , int(width / 3)+1 : int(2*width / 3)])
@@ -130,3 +130,4 @@ def Extracting_features(img):
 
 #img=io.imread("test character letters/beh.png")
 #x=Extracting_features(img)
+#print(x)
