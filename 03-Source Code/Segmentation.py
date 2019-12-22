@@ -188,6 +188,7 @@ def get_MTI(img):
 
 def getCharImages(Word, ShowSteps, WordTextIndex):
     """" GET Char per Word """
+    Word=255*Word
     WordCount = 0
     Characters = []
 
