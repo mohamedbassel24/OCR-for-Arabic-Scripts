@@ -10,7 +10,7 @@ def findLetterContourArea(img):
     # SE=np.ones((3,3))
     # img=Opening(img, SE)
     # show_images([img])
-    _, contours, _ = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     #   print(len(contours))
     # print(contours[0])
     if len(contours) == 0:
@@ -44,7 +44,7 @@ def count_holes(img, num_connected_parts):  # count number of holes in each char
     # print(img)
     # ret,thresh1 = cv2.threshold(img,50,255,cv2.THRESH_BINARY)
 
-    _, contours, _ = cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     # print("y= ",len(contours)-1-num_connected_parts)
     return abs(len(contours) - num_connected_parts)  # -1 is the contour of the image frame
 
@@ -100,7 +100,9 @@ def Max_transition_colomns(img):
 
 
 def White_Black_ration(img):
-    if (len(img[img == 0]) == 0   or len(img[img == 1] == 0)):
+    #print(len(img[img == 0]))
+    #print(len(img[img == 1]))
+    if ( len(img[img == 0]) == 0   or  len(img[img == 1] == 0)):
         return 1
     return len(img[ img == 1 ]) / len(img[ img == 0 ])
 
@@ -116,11 +118,20 @@ def Extracting_features(img):
     vertical_trans = Max_transition_colomns(img)
     horizontal_trans = Max_transition_rows(img)
     ratio0 = White_Black_ration(img)
-
+    if(ratio0==0):
+        ratio0=1
     ratio1 = White_Black_ration(img[0 : int(hieght / 2) , 0 : int(width / 2)])
+    if (ratio1 == 0):
+        ratio1 = 1
     ratio2 = White_Black_ration(img[0: int(hieght / 2), int(width / 2)+1:width])
+    if (ratio2 == 0):
+        ratio2 = 1
     ratio3 = White_Black_ration(img[int(hieght / 2)+1:hieght, 0: int(width / 2)])
+    if (ratio3 == 0):
+        ratio3 = 1
     ratio4 = White_Black_ration(img[int(hieght / 2)+1:hieght, int(width / 2)+1:width])
+    if (ratio4 == 0):
+        ratio4 = 1
 
     ratio5 = ratio1/ratio2
     ratio6 = ratio3/ratio4
@@ -142,6 +153,6 @@ def Extracting_features(img):
 
     return [num_parts, holes, h_W, vertical_trans, horizontal_trans,ratio0,ratio1,ratio2,ratio3,ratio4,ratio5,ratio6,ratio7,ratio8,ratio9,ratio10]
 
-# img=io.imread("test character letters/beh.png")
-# x=Extracting_features(img)
-# print(x)
+#img=io.imread("test character letters/beh.png")
+#x=White_Black_ration(img)
+#print(x)
