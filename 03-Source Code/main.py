@@ -17,7 +17,7 @@ alphabetic_Dict = {0: 'ا', 1: 'ب', 2: 'ت', 3: 'ث', 4: 'ج', 5: 'ح', 6: 'خ'
                    23: 'م', 24: 'ن', 25: 'ه', 26: 'و', 27: 'ي', 28: 'ؤ'}
 classifier_list = list(alphabetic_Dict.keys())
 alphabetic_list = list(alphabetic_Dict.values())
-Model_Mode = 0  # 1 for TESTING 0 for TRAINING
+Model_Mode = 1  # 1 for TESTING 0 for TRAINING
 Running_Time = []  # Representing the running time for each file
 ShowSteps = 0  # Representing the steps of each block
 

@@ -10,7 +10,7 @@ def findLetterContourArea(img):
     # SE=np.ones((3,3))
     # img=Opening(img, SE)
     # show_images([img])
-    contours, _ = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    _, contours, _ = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     #   print(len(contours))
     # print(contours[0])
     if len(contours) == 0:
@@ -44,7 +44,7 @@ def count_holes(img, num_connected_parts):  # count number of holes in each char
     # print(img)
     # ret,thresh1 = cv2.threshold(img,50,255,cv2.THRESH_BINARY)
 
-    contours, _ = cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    _, contours, _ = cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     # print("y= ",len(contours)-1-num_connected_parts)
     return abs(len(contours) - num_connected_parts)  # -1 is the contour of the image frame
 
@@ -100,14 +100,17 @@ def Max_transition_colomns(img):
 
 
 def White_Black_ration(img):
-    #print(len(img[img == 0]))
-    #print(len(img[img == 1]))
-    if ( len(img[img == 0]) == 0   or  len(img[img == 1] == 0)):
+    # print(len(img[img == 0]))
+    # print(len(img[img == 1]))
+    if (len(img[img == 0]) == 0 or len(img[img == 1] == 0)):
         return 1
-    return len(img[ img == 1 ]) / len(img[ img == 0 ])
+    return len(img[img == 1]) / len(img[img == 0])
+
 
 def white_number(img):
-    return len(img[ img == 1 ])
+    return len(img[img == 1])
+
+
 def Extracting_features(img):
     img[img > 1] = 1
     hieght = img.shape[0]
@@ -119,46 +122,47 @@ def Extracting_features(img):
     vertical_trans = Max_transition_colomns(img)
     horizontal_trans = Max_transition_rows(img)
     ratio0 = White_Black_ration(img)
-    white0=white_number(img)
-    if(white0==0):
-        white0=1
-    ratio1 = White_Black_ration(img[0 : int(hieght / 2) , 0 : int(width / 2)])
-    white1 = white_number(img[0 : int(hieght / 2) , 0 : int(width / 2)])
+    white0 = white_number(img)
+    if (white0 == 0):
+        white0 = 1
+    ratio1 = White_Black_ration(img[0: int(hieght / 2), 0: int(width / 2)])
+    white1 = white_number(img[0: int(hieght / 2), 0: int(width / 2)])
     if (white1 == 0):
         white1 = 1
-    ratio2 = White_Black_ration(img[0: int(hieght / 2), int(width / 2)+1:width])
-    white2 = white_number(img[0: int(hieght / 2), int(width / 2)+1:width])
+    ratio2 = White_Black_ration(img[0: int(hieght / 2), int(width / 2) + 1:width])
+    white2 = white_number(img[0: int(hieght / 2), int(width / 2) + 1:width])
     if (white2 == 0):
         white2 = 1
-    ratio3 = White_Black_ration(img[int(hieght / 2)+1:hieght, 0: int(width / 2)])
-    white3 = white_number(img[int(hieght / 2)+1:hieght, 0: int(width / 2)])
+    ratio3 = White_Black_ration(img[int(hieght / 2) + 1:hieght, 0: int(width / 2)])
+    white3 = white_number(img[int(hieght / 2) + 1:hieght, 0: int(width / 2)])
     if (white3 == 0):
         white3 = 1
-    ratio4 = White_Black_ration(img[int(hieght / 2)+1:hieght, int(width / 2)+1:width])
-    white4 = white_number(img[int(hieght / 2)+1:hieght, int(width / 2)+1:width])
+    ratio4 = White_Black_ration(img[int(hieght / 2) + 1:hieght, int(width / 2) + 1:width])
+    white4 = white_number(img[int(hieght / 2) + 1:hieght, int(width / 2) + 1:width])
     if (white4 == 0):
         white4 = 1
 
-    ratio5 = white1/white2
-    ratio6 = white3/white4
-    ratio7 = white1/white3
-    ratio8 = white2/white4
-    ratio9 = white1/white4
-    ratio10 = white2/white3
+    ratio5 = white1 / white2
+    ratio6 = white3 / white4
+    ratio7 = white1 / white3
+    ratio8 = white2 / white4
+    ratio9 = white1 / white4
+    ratio10 = white2 / white3
 
-    #ratio3 = White_Black_ration(img[0: int(hieght / 3),  int(width / 3)+1 : int(2*width / 3)])
-    #ratio4 = White_Black_ration(img[0: int(hieght / 3),  int(2*width / 3)+1 : width])
+    # ratio3 = White_Black_ration(img[0: int(hieght / 3),  int(width / 3)+1 : int(2*width / 3)])
+    # ratio4 = White_Black_ration(img[0: int(hieght / 3),  int(2*width / 3)+1 : width])
 
-    #ratio5 = White_Black_ration(img[int(hieght / 3) + 1: int(2 * hieght / 3), 0 : int(width / 3)])
-    #ratio6 = White_Black_ration(img[ int(hieght / 3)+1 : int(2*hieght / 3) , int(width / 3)+1 : int(2*width / 3)])
-    #ratio7 = White_Black_ration(img[int(hieght / 3) + 1: int(2 * hieght / 3), int(2*width / 3)+1 : width])
+    # ratio5 = White_Black_ration(img[int(hieght / 3) + 1: int(2 * hieght / 3), 0 : int(width / 3)])
+    # ratio6 = White_Black_ration(img[ int(hieght / 3)+1 : int(2*hieght / 3) , int(width / 3)+1 : int(2*width / 3)])
+    # ratio7 = White_Black_ration(img[int(hieght / 3) + 1: int(2 * hieght / 3), int(2*width / 3)+1 : width])
 
-    #ratio8 = White_Black_ration(img[int(2 * hieght / 3)+1:hieght, 0: int(width / 3)])
-    #ratio9 = White_Black_ration(img[int(2 * hieght / 3) + 1:hieght, int(width / 3)+1 : int(2*width / 3)])
-    #ratio10 = White_Black_ration(img[int(2 * hieght / 3) + 1:hieght, int(2*width / 3)+1 : width])
+    # ratio8 = White_Black_ration(img[int(2 * hieght / 3)+1:hieght, 0: int(width / 3)])
+    # ratio9 = White_Black_ration(img[int(2 * hieght / 3) + 1:hieght, int(width / 3)+1 : int(2*width / 3)])
+    # ratio10 = White_Black_ration(img[int(2 * hieght / 3) + 1:hieght, int(2*width / 3)+1 : width])
 
-    return [num_parts, holes, h_W, vertical_trans, horizontal_trans,ratio0,ratio1,ratio2,ratio3,ratio4,ratio5,ratio6,ratio7,ratio8,ratio9,ratio10]
+    return [num_parts, holes, h_W, vertical_trans, horizontal_trans, ratio0, ratio1, ratio2, ratio3, ratio4, ratio5,
+            ratio6, ratio7, ratio8, ratio9, ratio10]
 
-#img=io.imread("test character letters/beh.png")
-#x=White_Black_ration(img)
-#print(x)
+# img=io.imread("test character letters/beh.png")
+# x=White_Black_ration(img)
+# print(x)

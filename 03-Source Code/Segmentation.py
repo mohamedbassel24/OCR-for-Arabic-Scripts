@@ -134,7 +134,7 @@ def myVersion_GetWORDS(ListofImageLines, rShowSteps):
                         continue
                     else:
                         # show_images([IMG_Line[:, start:end]],["1"])
-                        ListOfWords.insert(0, IMG_Line[:, start:min(end+1,IMG_Line.shape[1]-1)])
+                        ListOfWords.insert(0, IMG_Line[:, start:min(end + 1, IMG_Line.shape[1] - 1)])
 
                         # print(start, end)
 
@@ -344,7 +344,7 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
             continue
         img2[:, Cut] = np.ones(img.shape[0]) * 150
 
-    #show_images([img2], ["After filterintg"])
+    #  show_images([img2], ["After filterintg"])
 
     # Do Filteration here
     if WordTextIndex == -1:  # For debuging search for a specific word :'(((((((((((((((((((((((((((((
@@ -396,9 +396,7 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
             else:
                 start = Old_Start
 
-    #  if IsDal(partition_Char):
-    # ListOfCuts[i - 1] = -1
-    # for sad and dad
+    # for sad and dad zawd feature lw Sum ta7t l base line be zero
     start = partition.shape[1]
     for i in range(len(ListOfCuts)):
         partition_Char = Word[:, ListOfCuts[i] + 1:start]
@@ -437,7 +435,7 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
         Characters.append(partition_Char)
     #  show_images([partition_Char], ["SubChar"])
     #  show_images([partition_Char], ["SubChar"])
-  #  show_images([partition, img], ["SubWord (" + str(WordTextIndex) + " )", "Smoothing"])
+    # show_images([partition, img], ["SubWord (" + str(WordTextIndex) + " )", "Smoothing"])
 
     # if ShowSteps:
     # print(StrokeList)
@@ -466,13 +464,22 @@ def IsStroke(Parition, MFV, Base_INDEX):
     HorizontalList = []
     for row in range(np.shape(Parition)[0]):
         CurrProjection = np.sum(Parition[row])
-        if row < 7 and CurrProjection != 0:
+        if row < 5 and CurrProjection != 0:
             return False
         if CurrProjection > MaxHorizontalProjection:
             MaxHorizontalProjection = CurrProjection
             HorizontalList.append(MaxHorizontalProjection)
-
-    if X > 20 and X <= 4:
+    VP = []
+    for Col in range(Parition.shape[1]):
+        VP.append(np.sum(Parition[:, Col]))
+    if len(VP) == 0:
+        Max_VP = 0
+    else:
+        Max_VP = np.max(VP)
+    #  print(Max_VP)
+    if Max_VP > 8:
+        return False
+    if 20 < X <= 4:
         return False
     if X < 9 and SHPB:
         return True
