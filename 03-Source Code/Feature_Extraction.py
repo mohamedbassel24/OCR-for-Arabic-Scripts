@@ -104,17 +104,30 @@ def White_Black_ration(img):
 
 def Extracting_features(img):
     img[img > 1] = 1
+    hieght=img.shape[0]
+    width=img.shape[1]
     img = img.astype('uint8')
     num_parts = Count_connected_parts(img)
     holes = count_holes(img, num_parts)
     h_W = Height_Width_Ratio(img)
     vertical_trans = Max_transition_colomns(img)
     horizontal_trans = Max_transition_rows(img)
-    #ratio1 = White_Black_ration(img)
-    #ratio2 = White_Black_ration(img[0 : int(img.shape[0] / 2) , 0 : int(img.shape[1] / 2)])
-    #ratio3 = White_Black_ration(img[int(img.shape[0] / 2)+1 : img.shape[0] , int(img.shape[1] / 2)+1 : img.shape[1]])
+    ratio1 = White_Black_ration(img)
 
-    return [num_parts, holes, h_W, vertical_trans, horizontal_trans]
+    ratio2 = White_Black_ration(img[0 : int(hieght / 3) , 0 : int(width / 3)])
+    ratio3 = White_Black_ration(img[0: int(hieght / 3),  int(width / 3)+1 : int(2*width / 3)])
+    ratio4 = White_Black_ration(img[0: int(hieght / 3),  int(2*width / 3)+1 : width])
+
+    ratio5 = White_Black_ration(img[int(hieght / 3) + 1: int(2 * hieght / 3), 0 : int(width / 3)])
+    ratio6 = White_Black_ration(img[ int(hieght / 3)+1 : int(2*hieght / 3) , int(width / 3)+1 : int(2*width / 3)])
+    ratio7 = White_Black_ration(img[int(hieght / 3) + 1: int(2 * hieght / 3), int(2*width / 3)+1 : width])
+
+    ratio8 = White_Black_ration(img[int(2 * hieght / 3)+1:hieght, 0: int(width / 3)])
+    ratio9 = White_Black_ration(img[int(2 * hieght / 3) + 1:hieght, int(width / 3)+1 : int(2*width / 3)])
+    ratio10 = White_Black_ration(img[int(2 * hieght / 3) + 1:hieght, int(2*width / 3)+1 : width])
+
+    return [num_parts, holes, h_W, vertical_trans, horizontal_trans,ratio1,ratio2,ratio3,ratio4,ratio5,ratio6,ratio7,ratio8,ratio9,ratio10]
 
 #img=io.imread("test character letters/beh.png")
 #x=Extracting_features(img)
+#print(x)

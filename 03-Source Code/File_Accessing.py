@@ -20,7 +20,9 @@ def Append_TraingSET(Traing_Points):
     f = open("data_point.txt", "a+")
     for Point in Traing_Points:
         f.write(str(Point[0][0]) + " " + str(Point[0][1]) + " " + str(Point[0][2]) + " " + str(Point[0][3]) + " " + str(
-            Point[0][4]) + " " + str(Point[1]) + "\n")
+            Point[0][4]) + " " + str(Point[0][5]) + " " + str(Point[0][6]) + " " + str(Point[0][7]) + " " +
+            str(Point[0][8]) + " " + str(Point[0][9]) + " " + str(Point[0][10]) + " " + str(Point[0][11]) + " " + str(
+                Point[0][12]) + " " +str(Point[0][13])+" "+str(Point[0][14])+" "+ str(Point[1]) + "\n")
 
 
 def ReadModel(FileName):
@@ -31,23 +33,17 @@ def ReadModel(FileName):
         FileContents = f.readlines()  # read file line by line
     else:
         return " "
-    splitLine = np.zeros((np.shape(FileContents)[0] - 1, 6))
+    splitLine = np.zeros((np.shape(FileContents)[0] - 1, 16))
     for i in range(1, np.shape(FileContents)[0]):  # loop for the lines before last
         FileContents[i] = FileContents[i][0:len(FileContents[i]) - 1]
         Point = FileContents[i].split(' ')
-        for j in range(6):
+        for j in range(16):
 
-            if j == 5:
+            if j == 15:
                 splitLine[i - 1, j] = int(Point[j])
             else:
                 splitLine[i - 1, j] = float(Point[j])
 
         # plitLine.append(FileContents[i].split(' '))
     # print(splitLine)
-    return splitLine[:, 0:5], splitLine[:, 5]
-
-
-def Write_ClassifiedText(Text): #TODO: take file name
-    """ This function to append new training point to our data set"""
-    f = open("Img_TEXT.txt", "w")
-    f.write(Text)
+    return splitLine[:, 0:15], splitLine[:, 15]
