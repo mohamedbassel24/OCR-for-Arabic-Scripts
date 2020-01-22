@@ -24,9 +24,7 @@ def Preprocess(img, showSteps):
                              flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
     rotated = cv2.cvtColor(rotated, cv2.COLOR_BGR2GRAY)
     _, threshold = cv2.threshold(rotated, 155, 255, cv2.THRESH_BINARY)
-    img_gray = rotated
-    mean_c = cv2.adaptiveThreshold(img_gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 15, 12)
-    gaus = cv2.adaptiveThreshold(img_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 91, 12)
+
     GlobalThresh = threshold_otsu(rotated)-100
     ThreshImage = np.copy(rotated)
     ThreshImage[rotated >= GlobalThresh] = 0

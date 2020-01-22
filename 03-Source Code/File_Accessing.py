@@ -21,8 +21,10 @@ def Append_TraingSET(Traing_Points):
     for Point in Traing_Points:
         f.write(str(Point[0][0]) + " " + str(Point[0][1]) + " " + str(Point[0][2]) + " " + str(Point[0][3]) + " " + str(
             Point[0][4]) + " " + str(Point[0][5]) + " " + str(Point[0][6]) + " " + str(Point[0][7]) + " " +
-            str(Point[0][8]) + " " + str(Point[0][9]) + " " + str(Point[0][10]) + " " + str(Point[0][11]) + " " + str(
-                Point[0][12]) + " " +str(Point[0][13])+" "+str(Point[0][14])+" "+ str(Point[0][15]) +" "+ str(Point[1]) + "\n")
+                str(Point[0][8]) + " " + str(Point[0][9]) + " " + str(Point[0][10]) + " " + str(
+            Point[0][11]) + " " + str(
+            Point[0][12]) + " " + str(Point[0][13]) + " " + str(Point[0][14]) + " " + str(Point[0][15]) + " " + str(
+            Point[1]) + "\n")
 
 
 def ReadModel(FileName):
@@ -47,3 +49,17 @@ def ReadModel(FileName):
         # plitLine.append(FileContents[i].split(' '))
     # print(splitLine)
     return splitLine[:, 0:16], splitLine[:, 16]
+
+
+def Write_ClassifiedText(Text,FileName):  # TODO: take file name
+    """ This function to append new training point to our data set"""
+    Dir="../output/text/"+FileName
+    f = open(Dir+".txt", "w", encoding='utf-8')
+    f.write(Text)
+
+def Write_RunTime(Text):  # TODO: take file name
+    """ This function to append new training point to our data set"""
+    Dir="../output/runtime"
+    f = open(Dir+".txt", "w", encoding='utf-8')
+    f.write(Text)
+

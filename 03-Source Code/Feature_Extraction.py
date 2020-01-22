@@ -10,7 +10,7 @@ def findLetterContourArea(img):
     # SE=np.ones((3,3))
     # img=Opening(img, SE)
     # show_images([img])
-    _, contours, _ = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     #   print(len(contours))
     # print(contours[0])
     if len(contours) == 0:
@@ -44,7 +44,7 @@ def count_holes(img, num_connected_parts):  # count number of holes in each char
     # print(img)
     # ret,thresh1 = cv2.threshold(img,50,255,cv2.THRESH_BINARY)
 
-    _, contours, _ = cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     # print("y= ",len(contours)-1-num_connected_parts)
     return abs(len(contours) - num_connected_parts)  # -1 is the contour of the image frame
 

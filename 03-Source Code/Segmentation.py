@@ -12,7 +12,6 @@ def SegmentedImageLines(img, rShowSteps):
     #  plt.show()
 
     img = 255 - img
-    ret, thresh = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY_INV)
     thresh = img
     # lines segmentation involves horizontal projection of the image rows to find the empty rows between rows that contain text a
     img_lines = np.copy(255 - img)
@@ -123,7 +122,6 @@ def myVersion_GetWORDS(ListofImageLines, rShowSteps):
         IMG_Line = 1 - IMG_Line
         for Col in range(IMG_Line.shape[1]):
             VP.append(np.sum(IMG_Line[:, Col]))
-        MaxVP = []
         ListOfWords = []
         start = -1
         end = -1
@@ -141,8 +139,8 @@ def myVersion_GetWORDS(ListofImageLines, rShowSteps):
                 start = -1
                 end = -1
                 continue
-            elif (VP[i] > 0):
-                if (start == -1):
+            elif VP[i] > 0:
+                if start == -1:
                     start = i
                 else:
                     end = i
@@ -185,6 +183,26 @@ def get_MTI(img):
     return MaxTransitionIndex
 
 
+def get_MTI_2(img):
+    MaxTransition = 0
+    MaxTransitionIndex = get_baseline(img)
+    Base_INDEX = get_baseline(img)
+    for i in range(0, Base_INDEX, 1):  # loop on Each row
+        CurrTransitionRow = 0
+        flag = 0
+        for j in range(img.shape[1]):  # loop on coloumns for specific row
+            if flag == 0 and img[i, j] == 1:
+                flag = 1
+                CurrTransitionRow += 1
+            elif flag == 1 and img[i, j] == 0:
+                flag = 0
+
+        if CurrTransitionRow > MaxTransition:
+            MaxTransitionIndex = i
+            MaxTransition = CurrTransitionRow
+    return MaxTransitionIndex
+
+
 def getCharImages(Word, ShowSteps, WordTextIndex):
     """" GET Char per Word """
     Word = 255 * Word
@@ -213,6 +231,7 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
     # ------------------------------------------------------------------------------------
     # Max transitions DETECTION =>
     MaxTransitionIndex = get_MTI(partition)
+    # AnotherMaxTransitionIndex = get_MTI_2(partition)
     # ------------------------------------------------------------------------------------
     # ----- GET The mode of vertical projections which represents the line between chars(BASELINE thickness)
     m = stats.mode([sum(x) for x in zip(*partition)])
@@ -225,7 +244,7 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
     WordCount += 1
     # Background => zero Word =>1
     for i in range(partition.shape[1]):  # loop on the partition Col
-        if partition[MaxTransitionIndex, i] == 0 and flag == 0:  # Check if its a background in the MTI After Char
+        if partition[MaxTransitionIndex, i] == 0  and flag == 0:  # Check if its a background in the MTI After Char
             StartIndex = i  # Start of my Cut
             flag = 1  # Search for the First Char
         elif partition[MaxTransitionIndex, i] == 1 and flag == 1:  # Change from back ground to New Char
@@ -243,7 +262,7 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
                 partition[Base_INDEX + 1:, :MiddleIndex])  # SUM OF HORIZONTAL PROJECTION Above BaseLine
             if FirstRegion and SHPA > 2:
                 sumPre = np.sum(partition[:, :EndIndex])
-                if sumPre > 20:
+                if sumPre > 12:  # modifiable
                     FirstRegion = False
 
             # for space separation
@@ -288,8 +307,8 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
             if FirstRegion:  # and abs(StartIndex-EndIndex)>4:
                 SHPA = np.sum(partition[0:Base_INDEX - 2,
                               0:EndIndex - 4])  # SUM OF HORIZONTAL PROJECTION Above BaseLine
-                SHPB = np.sum(partition[Base_INDEX:,
-                              0:EndIndex])  # SUM OF HORIZONTAL PROJECTION Above BaseLine
+                #SHPB = np.sum(partition[Base_INDEX:,
+                             # 0:EndIndex])  # SUM OF HORIZONTAL PROJECTION Above BaseLine
                 FirstRegion = False
                 if SHPA == 0:  # for ya2
                     if Count_connected_parts(Word[:, :EndIndex - 3]) == 3 or Count_connected_parts(
@@ -359,11 +378,36 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
         Binary_Word = np.copy(Word[:, 0: ListOfCuts[-1]])
         Binary_Word[Binary_Word > 0] = 1
         LargeHeight = np.sum(Binary_Word[5, :])
-        if (IsDal(Binary_Word) or ListOfCuts[-1] < 4 or IsStroke(Binary_Word,MFV,Base_INDEX)) and not LargeHeight:
+        if (IsDal(Binary_Word) or ListOfCuts[-1] < 4 or IsStroke(Binary_Word, MFV, Base_INDEX)) and not LargeHeight:
             ListOfCuts.pop()
 
     start = partition.shape[1]
     # Remove Cut for stroke =>
+
+    if len(ListOfCuts) > 5:
+        Last_Char = np.copy(Word[:, 0: ListOfCuts[-1]])
+        Before_Last = np.copy(Word[:, ListOfCuts[-1]: ListOfCuts[-2]])
+        Before_Before = np.copy(Word[:, ListOfCuts[-3]: ListOfCuts[-4]])
+
+        # If last char has SHPB more than above with aspect ratio
+
+        SHPA = np.sum(
+            partition[0:Base_INDEX - 1, 0:ListOfCuts[-1]])  # SUM OF HORIZONTAL PROJECTION Above BaseLine
+        SHPB = np.sum(
+            partition[Base_INDEX + 1:, 0:ListOfCuts[-1]])
+
+        Last_Char = Last_Char.astype('uint8')
+        Count_Components = Count_connected_parts(Last_Char)
+        if SHPB >= SHPA + 6 and 3 < SHPA < 6 and Count_Components == 1:  # Some thresholding to detect if the last is like ي
+
+            Before_Last = Before_Last.astype('uint8')
+            Count_Components = Count_connected_parts(Before_Last)
+            IsSad = count_holes(Before_Last, Count_Components) > 0
+            if IsStroke(Before_Last, MFV, Base_INDEX) or IsStroke(Before_Before, MFV, Base_INDEX):
+                ListOfCuts.pop()
+                ListOfCuts.pop()
+            elif IsSad:
+                ListOfCuts.pop()
 
     # for س ش
     for i in range(len(ListOfCuts)):
@@ -375,7 +419,11 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
             start = ListOfCuts[i + 1]
             partition_Char_2ndAfter = Word[:, ListOfCuts[i + 2] + 1:start]
             start = ListOfCuts[i + 2]
-            if IsStroke(partition_Char_2ndAfter, MFV, Base_INDEX) or (
+
+            partition_Char_After = partition_Char_After.astype('uint8')
+            Count_Components = Count_connected_parts(partition_Char_After)
+
+            if (IsStroke(partition_Char_2ndAfter, MFV, Base_INDEX)) or (
                     IsStroke(partition_Char_After, MFV, Base_INDEX)):
                 ListOfCuts[i] = -1
                 ListOfCuts[i + 1] = -1  # false cut
@@ -391,6 +439,14 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
         partition_Char = partition_Char.astype('uint8')
         Count_Components = Count_connected_parts(partition_Char)
         if count_holes(partition_Char, Count_Components) > 0 and i + 1 < len(ListOfCuts):
+
+            SHPA = np.sum(
+                partition_Char[0:Base_INDEX - 1, :])  # SUM OF HORIZONTAL PROJECTION Above BaseLine
+            SHPB = np.sum(
+                partition_Char[Base_INDEX + 2:, ::])  # SUM OF HORIZONTAL PROJECTION Above BaseLine
+        #    if SHPB != 0 or SHPA > 15:
+               # continue
+
             Old_Start = start
             partition_Char_After = Word[:, ListOfCuts[i + 1] + 1:start]
             start = ListOfCuts[i + 1]
@@ -399,32 +455,7 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
                 i += 1
             else:
                 start = Old_Start
-        # TODO: IF 2 strokes or one and not  and the last element has SHPA baseline = zero cancel the cut
 
-    if len(ListOfCuts) > 5:
-        Last_Char = np.copy(Word[:, 0: ListOfCuts[-1]])
-        Before_Last = np.copy(Word[:, ListOfCuts[-1]: ListOfCuts[-2]])
-        Before_Before = np.copy(Word[:, ListOfCuts[-3]: ListOfCuts[-4]])
-
-        # If last char has SHPB more than above with aspect ratio
-
-        SHPA = np.sum(
-            partition[0:Base_INDEX - 1, 0:ListOfCuts[-1]])  # SUM OF HORIZONTAL PROJECTION Above BaseLine
-        SHPB = np.sum(
-            partition[Base_INDEX + 1:, 0:ListOfCuts[-1]])
-     #   print(SHPA, SHPB)
-        Last_Char = Last_Char.astype('uint8')
-        Count_Components = Count_connected_parts(Last_Char)
-        if SHPB >= SHPA + 8 and 3<SHPA < 6 and Count_Components == 1:  # Some thresholding to detect if the last is like ي
-
-            Before_Last = Before_Last.astype('uint8')
-            Count_Components = Count_connected_parts(Before_Last)
-            IsSad = count_holes(Before_Last, Count_Components) > 0
-            if IsStroke(Before_Last, MFV, Base_INDEX) or IsStroke(Before_Before, MFV, Base_INDEX):
-                ListOfCuts.pop()
-                ListOfCuts.pop()
-            elif IsSad:
-                ListOfCuts.pop()
     # FILTRATION IS DONE now we actually cutting
     # TODO: Remove element with value =-1
     for Cut in ListOfCuts:
@@ -446,7 +477,7 @@ def getCharImages(Word, ShowSteps, WordTextIndex):
         if ShowSteps:
             show_images([partition_Char], ["SubChar"])
 
-    #show_images([partition, img], ["SubWord (" + str(WordTextIndex) + " )", "Smoothing"])
+  #  show_images([partition, img], ["SubWord (" + str(WordTextIndex) + " )", "Smoothing"])
 
     return Characters
 
@@ -485,7 +516,7 @@ def IsStroke(Parition, MFV, Base_INDEX):
         return False
     if 20 < X <= 4:
         return False
-    if X < 9 and SHPB:
+    if X < 9 and SHPB == 0:
         return True
     Parition[Parition > 0] = 1
     # Parition=1-Parition
@@ -529,6 +560,8 @@ def IsStroke(Parition, MFV, Base_INDEX):
     if count_holes(Parition, Count_Components) > 0:  # zawd condition hena
         return False
     # print("Is Stroke ")
+    if SHPB != 0:
+        return False
     return True
 
 
